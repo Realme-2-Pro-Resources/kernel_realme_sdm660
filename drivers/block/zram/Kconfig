@@ -43,6 +43,10 @@ config ZRAM_MEMORY_TRACKING
 
 	  See Documentation/blockdev/zram.txt for more information.
 
+config ZRAM_DEFAULT_COMP_ALGORITHM
+	string "Default ZRAM algorithm"
+	default "lzo"
+
 #ifdef VENDOR_EDIT
 # Wen.Luo@PSW.BSP.Kernel.Driver,2018/12/10, Add for enable crypto lz4 compress for zram lz4
 config ZRAM_LZ4_COMPRESS

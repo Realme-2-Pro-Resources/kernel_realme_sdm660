@@ -210,6 +210,8 @@ source "drivers/firmware/Kconfig"
 
 source "drivers/bif/Kconfig"
 
+source "drivers/anbox/Kconfig"
+
 source "drivers/sensors/Kconfig"
 
 source "drivers/tee/Kconfig"

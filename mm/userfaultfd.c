@@ -17,6 +17,36 @@
 #include <asm/tlbflush.h>
 #include "internal.h"
 
+static __always_inline
+struct vm_area_struct *find_dst_vma(struct mm_struct *dst_mm,
+				    unsigned long dst_start,
+				    unsigned long len)
+{
+	/*
+	 * Make sure that the dst range is both valid and fully within a
+	 * single existing vma.
+	 */
+	struct vm_area_struct *dst_vma;
+
+	dst_vma = find_vma(dst_mm, dst_start);
+	if (!dst_vma)
+		return NULL;
+
+	if (dst_start < dst_vma->vm_start ||
+	    dst_start + len > dst_vma->vm_end)
+		return NULL;
+
+	/*
+	 * Check the vma is registered in uffd, this is required to
+	 * enforce the VM_MAYWRITE check done at uffd registration
+	 * time.
+	 */
+	if (!dst_vma->vm_userfaultfd_ctx.ctx)
+		return NULL;
+
+	return dst_vma;
+}
+
 static int mcopy_atomic_pte(struct mm_struct *dst_mm,
 			    pmd_t *dst_pmd,
 			    struct vm_area_struct *dst_vma,
@@ -183,23 +213,8 @@ retry:
 	 * both valid and fully within a single existing vma.
 	 */
 	err = -ENOENT;
-	dst_vma = find_vma(dst_mm, dst_start);
+	dst_vma = find_dst_vma(dst_mm, dst_start, len);
 	if (!dst_vma)
-		goto out_unlock;
-	/*
-	 * Be strict and only allow __mcopy_atomic on userfaultfd
-	 * registered ranges to prevent userland errors going
-	 * unnoticed. As far as the VM consistency is concerned, it
-	 * would be perfectly safe to remove this check, but there's
-	 * no useful usage for __mcopy_atomic ouside of userfaultfd
-	 * registered ranges. This is after all why these are ioctls
-	 * belonging to the userfaultfd and not syscalls.
-	 */
-	if (!dst_vma->vm_userfaultfd_ctx.ctx)
-		goto out_unlock;
-
-	if (dst_start < dst_vma->vm_start ||
-	    dst_start + len > dst_vma->vm_end)
 		goto out_unlock;
 
 	err = -EINVAL;

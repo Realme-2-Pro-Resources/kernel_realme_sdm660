@@ -4830,6 +4830,9 @@ int register_common_touch_device(struct touchpanel_data *pdata)
         }
     }
 
+    if (ts->game_switch_support)
+        ts->ts_ops->mode_switch(ts->chip_data, MODE_GAME, true);
+
     //step 21 : createproc proc files interface
     init_touchpanel_proc(ts);
 
@@ -4854,6 +4857,7 @@ int register_common_touch_device(struct touchpanel_data *pdata)
     ts->skip_reset_in_resume = false;
     ts->irq_slot = 0;
     ts->firmware_update_type = 0;
+    ts->noise_level = 1;
     if(ts->is_noflash_ic) {
         ts->irq = ts->s_client->irq;
     } else {

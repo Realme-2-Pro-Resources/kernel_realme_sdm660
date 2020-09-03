@@ -1,0 +1,9 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: rama982/dokar:ubuntu
+    steps:
+      - run: git clone --depth 1 https://github.com/dodyirawan85/android_kernel_realme_sdm660
+      - run: curl -OsSL https://gitlab.com/dodyirawan85/scripts/raw/master/rmx1801-kernel-on-docker.sh
+      - run: bash rmx1801-kernel-on-docker.sh

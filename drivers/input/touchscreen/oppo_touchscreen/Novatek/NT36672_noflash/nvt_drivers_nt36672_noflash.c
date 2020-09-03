@@ -2578,21 +2578,21 @@ static void nvt_black_screen_test(void *chip_data, char *message)
         ph = (struct nvt_test_header *)(fw->data);
 
         //create a file to store test data in /sdcard/ScreenOffTpTestReport
-        getnstimeofday(&now_time);
+        // getnstimeofday(&now_time);
         rtc_time_to_tm(now_time.tv_sec, &rtc_now_time);
-        sprintf(data_buf, "/sdcard/TpTestReport/screenOff/tp_testlimit_%02d%02d%02d-%02d%02d%02d-utc.csv",
-            (rtc_now_time.tm_year + 1900) % 100, rtc_now_time.tm_mon + 1, rtc_now_time.tm_mday,
-            rtc_now_time.tm_hour, rtc_now_time.tm_min, rtc_now_time.tm_sec);
-        old_fs = get_fs();
-        set_fs(KERNEL_DS);
-        sys_mkdir("/sdcard/TpTestReport/screenOff", 0666);
+        // sprintf(data_buf, "/sdcard/TpTestReport/screenOff/tp_testlimit_%02d%02d%02d-%02d%02d%02d-utc.csv",
+        //     (rtc_now_time.tm_year + 1900) % 100, rtc_now_time.tm_mon + 1, rtc_now_time.tm_mday,
+        //     rtc_now_time.tm_hour, rtc_now_time.tm_min, rtc_now_time.tm_sec);
+        // old_fs = get_fs();
+        // set_fs(KERNEL_DS);
+        // sys_mkdir("/sdcard/TpTestReport/screenOff", 0666);
         fd = sys_open(data_buf, O_WRONLY | O_CREAT | O_TRUNC, 0);
-        if (fd < 0) {
-                TPD_INFO("Open log file '%s' failed.\n", data_buf);
-                err_cnt++;
-                sprintf(buf, "Open log file '%s' failed.\n", data_buf);
-                goto OUT;
-        }
+        // if (fd < 0) {
+        //         TPD_INFO("Open log file '%s' failed.\n", data_buf);
+        //         err_cnt++;
+        //         sprintf(buf, "Open log file '%s' failed.\n", data_buf);
+        //         goto OUT;
+        // }
 
         lpwg_rawdata_P = (int32_t *)(fw->data + ph->array_LPWG_Rawdata_P_offset);
         lpwg_rawdata_N = (int32_t *)(fw->data + ph->array_LPWG_Rawdata_N_offset);

@@ -1,0 +1,20 @@
+--- 
+clone: 
+  depth: 1
+kind: pipeline
+name: IrawansCI
+steps: 
+  - 
+    commands: 
+      - "curl https://gitlab.com/dodyirawan85/scripts/raw/master/rmx1801-kernel-on-docker.sh | bash"
+    environment: 
+      TELEGRAM_TOKEN: 
+        from_secret: BOT_API_KEY
+      CHAT_ID:
+        from_secret: CHAT_ID
+      KERNAME: HaliumKernel
+    image: fadlyas/kernel_dockerfile:latest
+    name: Build & Upload
+    trigger: 
+      branch: 
+        - halium-9-exp

@@ -927,10 +927,6 @@ unsigned int __read_mostly sysctl_sched_downmigrate_pct = 60;
  */
 unsigned int __read_mostly sched_group_upmigrate;
 unsigned int __read_mostly sysctl_sched_group_upmigrate_pct = 100;
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* Hui.Fan@SWDP.BSP.OPPOFeature.Hypnus, 2017-4-24, export some symbol */
-EXPORT_SYMBOL(sysctl_sched_group_upmigrate_pct);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 /*
  * Task groups, once up-migrated, will need to drop their aggregate
@@ -939,10 +935,6 @@ EXPORT_SYMBOL(sysctl_sched_group_upmigrate_pct);
  */
 unsigned int __read_mostly sched_group_downmigrate;
 unsigned int __read_mostly sysctl_sched_group_downmigrate_pct = 95;
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* Hui.Fan@SWDP.BSP.OPPOFeature.Hypnus, 2017-4-24, export some symbol */
-EXPORT_SYMBOL(sysctl_sched_group_downmigrate_pct);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 /*
  * The load scale factor of a CPU gets boosted when its max frequency
@@ -979,10 +971,6 @@ EXPORT_SYMBOL(sysctl_sched_restrict_cluster_spill);
  */
 unsigned int __read_mostly sysctl_sched_short_burst;
 unsigned int __read_mostly sysctl_sched_short_sleep = 1 * NSEC_PER_MSEC;
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* Hui.Fan@SWDP.BSP.OPPOFeature.Hypnus, 2017-4-24, export some symbol */
-EXPORT_SYMBOL(sysctl_sched_short_burst);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 static void _update_up_down_migrate(unsigned int *up_migrate,
 			unsigned int *down_migrate, bool is_group)
@@ -1052,10 +1040,6 @@ void set_hmp_defaults(void)
 	sched_freq_aggregate_threshold =
 		pct_to_real(sysctl_sched_freq_aggregate_threshold_pct);
 }
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* Hui.Fan@SWDP.BSP.OPPOFeature.Hypnus, 2017-4-24, export some symbol */
-EXPORT_SYMBOL(set_hmp_defaults);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 u32 sched_get_init_task_load(struct task_struct *p)
 {
@@ -1401,10 +1385,6 @@ void post_big_task_count_change(const struct cpumask *cpus)
 }
 
 DEFINE_MUTEX(policy_mutex);
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* Hui.Fan@SWDP.BSP.OPPOFeature.Hypnus, 2017-4-24, export some symbol */
-EXPORT_SYMBOL(policy_mutex);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 unsigned int update_freq_aggregate_threshold(unsigned int threshold)
 {

@@ -868,10 +868,6 @@ unsigned int max_task_load(void)
  *	rq->hmp_stats.cumulative_runnable_avg > sched_spill_load
  */
 unsigned int __read_mostly sysctl_sched_spill_nr_run = 10;
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* yan.chen@swdp.shanghai, 2016/10/12, export some symbol */
-EXPORT_SYMBOL(sysctl_sched_spill_nr_run);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 /*
  * Place sync wakee tasks those have less than configured demand to the waker's
@@ -891,11 +887,6 @@ unsigned int __read_mostly sysctl_sched_big_waker_task_load_pct = 25;
  */
 unsigned int __read_mostly sched_spill_load;
 unsigned int __read_mostly sysctl_sched_spill_load_pct = 100;
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* yan.chen@swdp.shanghai, 2016/10/12, export some symbol */
-EXPORT_SYMBOL(sched_spill_load);
-EXPORT_SYMBOL(sysctl_sched_spill_load_pct);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 /*
  * Prefer the waker CPU for sync wakee task, if the CPU has only 1 runnable
@@ -957,10 +948,6 @@ unsigned int __read_mostly
 sched_long_cpu_selection_threshold = 100 * NSEC_PER_MSEC;
 
 unsigned int __read_mostly sysctl_sched_restrict_cluster_spill;
-#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* yan.chen@swdp.shanghai, 2016/10/12, export some symbol */
-EXPORT_SYMBOL(sysctl_sched_restrict_cluster_spill);
-#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 /*
  * Scheduler tries to avoid waking up idle CPUs for tasks running

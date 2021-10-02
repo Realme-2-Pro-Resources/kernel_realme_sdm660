@@ -34,7 +34,6 @@ extern char ftm_spk_resistance[24];
 #define BOOT_MODE_FACTORY 3
 #endif
 #endif /* VENDOR_EDIT */
-#define CONFIG_DEBUG_FS 1
 
 /* handle macro for bitfield */
 #define TFA_MK_BF(reg, pos, len) ((reg<<8)|(pos<<4)|(len-1))

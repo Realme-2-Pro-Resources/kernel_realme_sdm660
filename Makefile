@@ -410,6 +410,8 @@ KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 TARGET_BUILD_VARIANT := user
 VENDOR_EDIT := 1
+OPPO_TARGET_DEVICE := MSM_18321
+PROJECT_NAME := sdm660_64
 
 #ifdef VENDOR_EDIT
 #Bin.Yan@Swdp.Android.BuildConfig, 2017/01/07, Add for kernel Build FLAGS
@@ -553,6 +555,8 @@ export KBUILD_AFLAGS_KERNEL KBUILD_CFLAGS_KERNEL
 export KBUILD_ARFLAGS
 export TARGET_BUILD_VARIANT
 export VENDOR_EDIT
+export OPPO_TARGET_DEVICE
+export PROJECT_NAME
 
 # When compiling out-of-tree modules, put MODVERDIR in the module
 # tree rather than in the kernel tree. The kernel tree might

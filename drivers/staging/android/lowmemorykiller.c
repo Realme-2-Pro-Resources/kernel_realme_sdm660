@@ -50,6 +50,10 @@
 #include <linux/vmpressure.h>
 #include <linux/zcache.h>
 
+#include <linux/proc_fs.h>
+#include <linux/slab.h>
+#include <linux/poll.h>
+
 #ifdef VENDOR_EDIT
 #include <linux/circ_buf.h>
 #endif
@@ -165,22 +169,6 @@ void handle_lmk_event(struct task_struct *selected, int selected_tasksize,
 	int tail;
 	struct lmk_event *events;
 	struct lmk_event *event;
-#ifndef VENDOR_EDIT
-//Zongyang.wang@ODM_RH.BSP.stability,modify for rwsem_down_read_failed for mmap_sem	
-	int res;
-	char taskname[MAX_TASKNAME];
-
-	res = get_cmdline(selected, taskname, MAX_TASKNAME - 1);
-
-	/* No valid process name means this is definitely not associated with a
-	 * userspace activity.
-	 */
-
-	if (res <= 0 || res >= MAX_TASKNAME)
-		return;
-
-	taskname[res] = '\0';
-#endif /* VENDOR_EDIT */
 
 	spin_lock(&lmk_event_lock);
 
@@ -195,12 +183,8 @@ void handle_lmk_event(struct task_struct *selected, int selected_tasksize,
 
 	events = (struct lmk_event *) event_buffer.buf;
 	event = &events[head];
-#ifdef VENDOR_EDIT
-//Zongyang.wang@ODM_RH.BSP.stability,modify for rwsem_down_read_failed for mmap_sem
+
 	strncpy(event->taskname, selected->comm, MAX_TASKNAME);
-#else
-	memcpy(event->taskname, taskname, res + 1);
-#endif /* VENDOR_EDIT */
 
 	event->pid = selected->pid;
 	event->uid = from_kuid_munged(current_user_ns(), task_uid(selected));
@@ -366,6 +350,7 @@ static int lmk_vmpressure_notifier(struct notifier_block *nb,
 	if (pressure >= 95) {
 		other_file = global_page_state(NR_FILE_PAGES) + zcache_pages() -
 			global_page_state(NR_SHMEM) -
+			global_page_state(NR_UNEVICTABLE) -
 			total_swapcache_pages();
 		other_free = global_page_state(NR_FREE_PAGES);
 #ifdef VENDOR_EDIT
@@ -384,6 +369,7 @@ static int lmk_vmpressure_notifier(struct notifier_block *nb,
 
 		other_file = global_page_state(NR_FILE_PAGES) + zcache_pages() -
 			global_page_state(NR_SHMEM) -
+			global_page_state(NR_UNEVICTABLE) -
 			total_swapcache_pages();
 
 		other_free = global_page_state(NR_FREE_PAGES);
@@ -396,6 +382,7 @@ static int lmk_vmpressure_notifier(struct notifier_block *nb,
 	} else if (atomic_read(&shift_adj)) {
 		other_file = global_page_state(NR_FILE_PAGES) + zcache_pages() -
 			global_page_state(NR_SHMEM) -
+			global_page_state(NR_UNEVICTABLE) -
 			total_swapcache_pages();
 		other_free = global_page_state(NR_FREE_PAGES);
 

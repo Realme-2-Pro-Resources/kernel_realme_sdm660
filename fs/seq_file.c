@@ -14,6 +14,7 @@
 #include <linux/mm.h>
 #include <linux/printk.h>
 #include <linux/string_helpers.h>
+#include <linux/pagemap.h>
 
 #include <asm/uaccess.h>
 #include <asm/page.h>
@@ -26,6 +27,8 @@ static void seq_set_overflow(struct seq_file *m)
 static void *seq_buf_alloc(unsigned long size)
 {
 	void *buf;
+	if (unlikely(size > MAX_RW_COUNT))
+		return NULL;
 #ifndef VENDOR_EDIT
 /*huacai.zhou@PSW.BSP.Kernel.MM 2018/07/18 optimize for high order allocation*/
 	gfp_t gfp = GFP_KERNEL;

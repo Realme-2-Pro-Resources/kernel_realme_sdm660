@@ -880,9 +880,6 @@ static int usb_icl_vote_callback(struct votable *votable, void *data,
 	if (icl_ua > pval.intval)
 		rerun_aicl = true;
 
-#ifndef CONFIG_PRODUCT_REALME_RMX1801
-// wenbin.liu@BSP.CHG.Basic, 2018/01/09
-// Add for OPPO not use this
 	if (rerun_aicl) {
 		/* set a lower ICL */
 		pval.intval = max(pval.intval - ICL_STEP_UA, ICL_STEP_UA);
@@ -890,7 +887,6 @@ static int usb_icl_vote_callback(struct votable *votable, void *data,
 				POWER_SUPPLY_PROP_CURRENT_MAX,
 				&pval);
 	}
-#endif /*CONFIG_PRODUCT_REALME_RMX1801*/
 	/* set the effective ICL */
 	pval.intval = icl_ua;
 	power_supply_set_property(chip->main_psy,
@@ -1342,12 +1338,6 @@ int qcom_batt_init(void)
 	chip->pl_ws = wakeup_source_register("qcom-battery");
 	if (!chip->pl_ws)
 		goto cleanup;
-
-	INIT_DELAYED_WORK(&chip->status_change_work, status_change_work);
-	INIT_DELAYED_WORK(&chip->pl_taper_work, pl_taper_work);
-	INIT_WORK(&chip->pl_disable_forever_work, pl_disable_forever_work);
-	INIT_DELAYED_WORK(&chip->pl_awake_work, pl_awake_work);
-	INIT_DELAYED_WORK(&chip->fcc_step_update_work, fcc_step_update_work);
 
 	chip->fcc_votable = create_votable("FCC", VOTE_MIN,
 					pl_fcc_vote_callback,

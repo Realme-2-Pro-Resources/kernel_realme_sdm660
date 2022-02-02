@@ -71,6 +71,7 @@ enum pon_restart_reason {
 	PON_RESTART_REASON_KERNEL			= 0x0D,
 	PON_RESTART_REASON_MODEM			= 0x0E,
 	PON_RESTART_REASON_ANDROID			= 0x0F,
+	PON_RESTART_REASON_SAFE				= 0x2A,
 	PON_RESTART_REASON_NORMAL			= 0x12,
 #endif
 	/* 32 ~ 63 for OEMs/ODMs secific features */

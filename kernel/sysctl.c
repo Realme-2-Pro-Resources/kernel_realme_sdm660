@@ -142,6 +142,14 @@ static int ten_thousand = 10000;
 static int six_hundred_forty_kb = 640 * 1024;
 #endif
 
+#ifdef CONFIG_PRODUCT_REALME_SDM660
+/*yanwu@TECH.Storage.FS, 2019-07-15, add control f2fs fsync nobarrier*/
+unsigned int sysctl_f2fs_fsync_nobarrier = 0;
+/*jason.tang@TECH.BSP.Kernel.Storage, 2019-05-20, add control ext4 fsync*/
+unsigned int sysctl_ext4_fsync_enable = 1;
+unsigned int ext4_fsync_enable_status = 0;
+#endif /*CONFIG_PRODUCT_REALME_SDM660*/
+
 /* this is needed for the proc_doulongvec_minmax of vm_dirty_bytes */
 static unsigned long dirty_bytes_min = 2 * PAGE_SIZE;
 
@@ -319,6 +327,16 @@ static struct ctl_table kern_table[] = {
 		.maxlen         = sizeof(unsigned int),
 		.mode           = 0644,
 		.proc_handler   = proc_dointvec,
+	},
+#endif
+#ifdef CONFIG_PRODUCT_REALME_SDM660
+/*jason.tang@TECH.BSP.Kernel.Storage, 2019-05-20, add control ext4 fsync*/
+	{
+			.procname	= "ext4_fsync_enable",
+			.data		= &sysctl_ext4_fsync_enable,
+			.maxlen		= sizeof(unsigned int),
+			.mode		= 0666,
+			.proc_handler	= proc_dointvec,
 	},
 #endif
 #ifdef CONFIG_SCHED_DEBUG

@@ -107,27 +107,12 @@ static void *kaslr_imem_addr;
 static bool scm_dload_supported;
 
 #ifdef CONFIG_PRODUCT_REALME_SDM660
-/*YiXue.Ge@PSW.BSP.Kernel.Driver,2017/05/15,
- * Add for can disable minidump by rom update
- */
-static int romupdate_minidumpdisable = 0;
-static int __init minidump_disable_param(char *str)
-{
-	if (*str)
-		return 0;
-	romupdate_minidumpdisable = 1;
-	return 1;
-}
-__setup("minidump.disable", minidump_disable_param);
-
-//#ifdef CONFIG_PRODUCT_REALME_SDM660
 //Wanghao@BSP.Kernel.Function 2018/12/07, add for 5G modem dump issue
 int get_download_mode(void)
 {
 	return download_mode && (dload_type & SCM_DLOAD_FULLDUMP);
 }
 EXPORT_SYMBOL(get_download_mode);
-//#endif
 #endif /*CONFIG_PRODUCT_REALME_SDM660*/
 
 
@@ -703,8 +688,8 @@ static int msm_restart_probe(struct platform_device *pdev)
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 /*ziqing.guo@BSP.Kernel.Stability, 2017/05/22, Modify for disable sdi only for the secure enabled device stage 2*/
 	#define OEM_SEC_ENABLE_ANTIROLLBACK_REG 0x78019c //this address just for sdm660
-	void __iomem *oem_config_base = NULL;
-	uint32_t secure_oem_config = 0;
+	void __iomem *oem_config_base = ioremap(OEM_SEC_ENABLE_ANTIROLLBACK_REG, 4);
+	uint32_t secure_oem_config = __raw_readl(oem_config_base);
 #endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 	struct device *dev = &pdev->dev;
 	struct resource *mem;
@@ -714,9 +699,6 @@ static int msm_restart_probe(struct platform_device *pdev)
 	atomic_notifier_chain_register(&panic_notifier_list, &panic_blk);
 	#ifdef CONFIG_PRODUCT_REALME_SDM660
 	/*ziqing.guo@BSP.Kernel.Stability, 2017/05/22, Modify for disable sdi only for the secure enabled device stage 2*/
-	#define OEM_SEC_ENABLE_ANTIROLLBACK_REG 0x78019c //this address just for sdm660
-	void __iomem *oem_config_base = ioremap(OEM_SEC_ENABLE_ANTIROLLBACK_REG, 4);
-	uint32_t secure_oem_config = __raw_readl(oem_config_base);
 	iounmap(oem_config_base);
 	if (secure_oem_config) {
 		pr_debug("this is a secure stage 2 device\n");
@@ -826,16 +808,6 @@ skip_sysfs_create:
 
 	if (scm_is_call_available(SCM_SVC_PWR, SCM_IO_DEASSERT_PS_HOLD) > 0)
 		scm_deassert_ps_hold_supported = true;
-
-#ifdef CONFIG_PRODUCT_REALME_SDM660
-	/*YiXue.Ge@PSW.BSP.Kernel.Driver,2017/05/15,
-	 * Add for can disable minidump by rom update
-	 */
-
-	if(romupdate_minidumpdisable){
-		download_mode = 0;
-	}
-#endif
 
 #ifdef CONFIG_QCOM_DLOAD_MODE
 	set_dload_mode(download_mode);

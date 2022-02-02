@@ -329,6 +329,7 @@ static struct class_attribute pl_attributes[] = {
 #define MINIMUM_PARALLEL_FCC_UA		500000
 #define PL_TAPER_WORK_DELAY_MS		500
 #define TAPER_RESIDUAL_PCT		75
+#ifndef CONFIG_PRODUCT_REALME_SDM660
 static void pl_taper_work(struct work_struct *work)
 {
 	struct pl_data *chip = container_of(work, struct pl_data,
@@ -380,6 +381,7 @@ static void pl_taper_work(struct work_struct *work)
 done:
 	vote(chip->pl_awake_votable, TAPER_END_VOTER, false, 0);
 }
+#endif
 
 /*********
  *  FCC  *
@@ -606,6 +608,7 @@ static int pl_fcc_vote_callback(struct votable *votable, void *data,
 	return 0;
 }
 
+#ifndef CONFIG_PRODUCT_REALME_SDM660
 static void fcc_step_update_work(struct work_struct *work)
 {
 	struct pl_data *chip = container_of(work,
@@ -791,6 +794,7 @@ stepper_exit:
 		vote(chip->pl_awake_votable, FCC_STEPPER_VOTER, false, 0);
 	}
 }
+#endif
 
 #define PARALLEL_FLOAT_VOLTAGE_DELTA_UV 50000
 static int pl_fv_vote_callback(struct votable *votable, void *data,
@@ -898,6 +902,7 @@ static int usb_icl_vote_callback(struct votable *votable, void *data,
 	return 0;
 }
 
+#ifndef CONFIG_PRODUCT_REALME_SDM660
 static void pl_disable_forever_work(struct work_struct *work)
 {
 	struct pl_data *chip = container_of(work,
@@ -918,6 +923,7 @@ static void pl_awake_work(struct work_struct *work)
 
 	vote(chip->pl_awake_votable, PL_VOTER, false, 0);
 }
+#endif
 
 static int pl_disable_vote_callback(struct votable *votable,
 		void *data, int pl_disable, const char *client)

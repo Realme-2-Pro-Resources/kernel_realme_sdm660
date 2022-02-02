@@ -1,6 +1,6 @@
 /**********************************************************************************
 * Copyright (c)  2008-2015  Guangdong OPPO Mobile Comm Corp., Ltd
-* CONFIG_PRODUCT_REALME_SDM660
+* CONFIG_PRODUCT_REALME_RMX1801
 * Description: Charger IC management module for charger system framework.
 *              Manage all charger IC and define abstarct function flow.
 * Version    : 1.0

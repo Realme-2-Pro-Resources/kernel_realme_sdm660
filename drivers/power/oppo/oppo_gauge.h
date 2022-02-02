@@ -1,6 +1,6 @@
 /**********************************************************************************
 * Copyright (c)  2008-2015  Guangdong OPPO Mobile Comm Corp., Ltd
-* CONFIG_PRODUCT_REALME_SDM660
+* CONFIG_PRODUCT_REALME_RMX1801
 * Description: Charger IC management module for charger system framework.
 *                 Manage all charger IC and define abstarct function flow.
 * Version    : 1.0
@@ -38,16 +38,16 @@ struct oppo_gauge_operations {
         int (*get_battery_temperature)(void);
         int (*get_batt_remaining_capacity)(void);
         int (*get_battery_soc)(void);
-        int (*get_prev_battery_soc)(void);
         int (*get_average_current)(void);
         int (*get_battery_fcc)(void);
         int (*get_battery_cc)(void);
         int (*get_battery_soh)(void);
         bool (*get_battery_authenticate)(void);
         void (*set_battery_full)(bool);
-        int (*get_prev_battery_mvolts)(void);
-        int (*get_prev_battery_temperature)(void);
-        int (*get_prev_average_current)(void);
+        int (*get_prev_battery_mvolts) (void);
+        int (*get_prev_battery_temperature) (void);
+        int (*get_prev_battery_soc) (void);
+        int (*get_prev_average_current) (void);
 };
 
 /****************************************

@@ -1,6 +1,6 @@
 /**********************************************************************************
 * Copyright (c)  2008-2015  Guangdong OPPO Mobile Comm Corp., Ltd
-* CONFIG_PRODUCT_REALME_SDM660
+* CONFIG_PRODUCT_REALME_RMX1801
 * Description: Charger IC management module for charger system framework.
 *                          Manage all charger IC and define abstarct function flow.
 * Version   : 1.0
@@ -65,12 +65,6 @@
 #include "oppo_charger.h"
 #include "oppo_gauge.h"
 
-#ifdef CONFIG_OPPO_EMMC_LOG
-/*Jingchun.Wang@BSP.Kernel.Debug, 2016/12/21,*/
-/*add for emmc log*/
-#include <soc/oppo/oppo_emmclog.h>
-#endif /*CONFIG_OPPO_EMMC_LOG*/
-
 #if defined(CONFIG_OPPO_CHARGER_MTK6763) || defined(CONFIG_OPPO_CHARGER_MTK6771)
 extern int oppo_usb_shell_ctrl_switch_gpio_init(struct oppo_chg_chip *chip);
 extern int oppo_usb_switch_gpio_gpio_init(struct oppo_chg_chip *chip);
@@ -101,14 +95,14 @@ static struct oppo_chg_chip *g_charger_chip = NULL;
 
 #define OPPO_CHG_DEFAULT_CHARGING_CURRENT        512
 
-int enable_charger_log = 2;
+int enable_charger_log = 0;
 int charger_abnormal_log = 0;
 
 /* wenbin.liu@SW.Bsp.Driver, 2016/03/01  Add for log tag*/
 #define charger_xlog_printk(num, fmt, ...) \
         do { \
                 if (enable_charger_log >= (int)num) { \
-                        printk(KERN_NOTICE pr_fmt("[OPPO_CHG][%s]"fmt), __func__, ##__VA_ARGS__); \
+                        pr_debug(KERN_NOTICE pr_fmt("[OPPO_CHG][%s]"fmt), __func__, ##__VA_ARGS__); \
                 } \
         } while (0)
 
@@ -2708,7 +2702,7 @@ static int fb_notifier_callback(struct notifier_block *nb, unsigned long event, 
                 if (event == FB_EVENT_BLANK) {
                         blank = *(int *)evdata->data;
                         if (blank == FB_BLANK_UNBLANK) {
-                                g_charger_chip->led_on = true;
+                                g_charger_chip->led_on = false; // default = true
                                 g_charger_chip->led_status_change = true;
                         } else if (blank == FB_BLANK_POWERDOWN) {
                                 g_charger_chip->led_on = false;
@@ -3845,20 +3839,6 @@ static void oppo_chg_print_log(struct oppo_chg_chip *chip)
         chip->temperature, chip->batt_volt, chip->icharging, chip->soc, chip->ui_soc, chip->soc_load, chip->batt_rm,
         chip->vbatt_over, chip->chging_over_time, chip->vchg_status, chip->tbatt_status, chip->stop_voter, chip->notify_code,
         chip->otg_switch, chip->mmi_chg, chip->boot_reason, chip->boot_mode, chip->chargerid_volt, chip->chargerid_volt_got);
-
-
-#ifdef CONFIG_OPPO_EMMC_LOG
-/*Jingchun.Wang@BSP.Kernel.Debug, 2016/12/21,*/
-/*add for emmc log*/
-        kernel_emmclog_print(" CHGR[ %d / %d / %d / %d / %d ], BAT[ %d / %d / %d / %d / %d / %d ], GAUGE[ %d / %d / %d / %d / %d / %d / %d ], "
-                "STATUS[ 0x%x / %d / %d / %d / %d / 0x%x ], OTHER[ %d / %d / %d / %d / %d/ %d ]\n",
-        chip->charger_exist, chip->charger_type, chip->charger_volt, chip->prop_status, chip->boot_mode,
-        chip->batt_exist, chip->batt_full, chip->chging_on, chip->in_rechging, chip->charging_state, chip->total_time,
-        chip->temperature, chip->batt_volt, chip->icharging, chip->soc, chip->ui_soc, chip->soc_load, chip->batt_rm,
-        chip->vbatt_over, chip->chging_over_time, chip->vchg_status, chip->tbatt_status, chip->stop_voter, chip->notify_code,
-        chip->otg_switch, chip->mmi_chg, chip->boot_reason, chip->boot_mode, chip->chargerid_volt, chip->chargerid_volt_got);
-#endif /*CONFIG_OPPO_EMMC_LOG*/
-
 }
 #define CHARGER_ABNORMAL_DETECT_TIME 24
 static void oppo_chg_critical_log(struct oppo_chg_chip *chip)

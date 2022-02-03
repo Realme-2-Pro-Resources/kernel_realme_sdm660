@@ -1,0 +1,11 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+
+&i2c_4 {
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-1;
+};
+
+&i2c_6 {
+	/delete-property/ status;
+};

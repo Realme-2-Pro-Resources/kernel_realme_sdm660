@@ -1,0 +1,50 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+
+
+&pm660l_3 {
+	qcom,leds@d000 {
+		/delete-node/ qcom,rgb_0;
+	};
+};
+
+&green_led {
+	linux,name = "button-backlight";
+};
+
+&blue_led {
+	qcom,max-current = <3>;
+	qcom,start-idx = <1>;
+	qcom,duty-pcts = [00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14];
+	qcom,lut-flags = <0x1f>;
+	qcom,pause-lo = <2000>;
+	qcom,pause-hi = <700>;
+	qcom,ramp-step-ms = <35>;
+	qcom,ratio = <20>;
+	qcom,use-blink;
+	linux,name = "white";
+};
+
+&pm660l_wled {
+	qcom,fs-curr-ua = <20000>;
+	qcom,en-cabc;
+};
+
+&pm660l_flash0 {
+	qcom,current-ma = <750>;
+};
+
+&pm660l_flash1 {
+	qcom,current-ma = <750>;
+};
+
+&pm660l_torch0 {
+	qcom,current-ma = <108>;
+};
+
+&pm660l_torch1 {
+	qcom,current-ma = <108>;
+};
+
+&pm660l_torch2 {
+	qcom,current-ma = <180>;
+};

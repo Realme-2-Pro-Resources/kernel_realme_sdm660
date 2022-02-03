@@ -55,13 +55,8 @@
 			"csiphy_timer_src_clk", "csiphy_timer_clk",
 			"camss_ispif_ahb_clk", "csiphy_clk_src", "csiphy_clk",
 			"csiphy_ahb2crif";
-		/*modified by hufeng for can not take 20MP picture*/
-		/*
 		qcom,clock-rates = <0 0 0 0 0 0 310000000 0 0 269333333 0
 			0 200000000 0 0>;
-		*/
-		qcom,clock-rates = <0 0 0 0 0 0 384000000 0 0 269333333 0
-			0 384000000 0 0>;
 		status = "ok";
 	};
 
@@ -98,13 +93,8 @@
 			"csiphy_timer_src_clk", "csiphy_timer_clk",
 			"camss_ispif_ahb_clk", "csiphy_clk_src", "csiphy_clk",
 			"csiphy_ahb2crif";
-		/*modified by hufeng for can not take 20MP picture*/
-		/*
 		qcom,clock-rates = <0 0 0 0 0 0 310000000 0 0 269333333 0
 			0 200000000 0 0>;
-		*/
-		qcom,clock-rates = <0 0 0 0 0 0 384000000 0 0 269333333 0
-			0 384000000 0 0>;
 		status = "ok";
 	};
 
@@ -141,13 +131,8 @@
 			"csiphy_timer_src_clk", "csiphy_timer_clk",
 			"camss_ispif_ahb_clk", "csiphy_clk_src", "csiphy_clk",
 			"csiphy_ahb2crif";
-		/*modified by hufeng for can not take 20MP picture*/
-		/*
 		qcom,clock-rates = <0 0 0 0 0 0 310000000 0 0 269333333 0
 			0 200000000 0 0>;
-		*/
-		qcom,clock-rates = <0 0 0 0 0 0 384000000 0 0 269333333 0
-			0 384000000 0 0>;
 		status = "ok";
 	};
 
@@ -187,11 +172,7 @@
 			"ispif_ahb_clk", "csi_src_clk", "csiphy_clk_src",
 			"csi_clk", "csi_ahb_clk", "csi_rdi_clk",
 			"csi_pix_clk", "cphy_csid_clk";
-		/*modified by hufeng for can not take 20MP picture*/
-		/*
 		qcom,clock-rates = <0 0 0 0 0 0 0 310000000 200000000
-		*/
-		qcom,clock-rates = <0 0 0 0 0 0 0 384000000 384000000
 			0 0 0 0 0>;
 		status = "ok";
 	};
@@ -232,11 +213,7 @@
 			"ispif_ahb_clk", "csi_src_clk", "csiphy_clk_src",
 			"csi_clk", "csi_ahb_clk", "csi_rdi_clk",
 			"csi_pix_clk", "cphy_csid_clk";
-		/*modified by hufeng for can not take 20MP picture*/
-		/*
 		qcom,clock-rates = <0 0 0 0 0 0 0 310000000 200000000
-		*/
-		qcom,clock-rates = <0 0 0 0 0 0 0 256000000 256000000
 			 0 0 0 0 0>;
 		status = "ok";
 	};
@@ -277,12 +254,7 @@
 			"ispif_ahb_clk", "csi_src_clk", "csiphy_clk_src",
 			"csi_clk", "csi_ahb_clk", "csi_rdi_clk",
 			"csi_pix_clk", "cphy_csid_clk";
-		/*modified by hufeng for can not take 20MP picture*/
-		/*
 		qcom,clock-rates = <0 0 0 0 0 0 0 310000000 200000000
-			 0 0 0 0 0>;
-		*/
-		qcom,clock-rates = <0 0 0 0 0 0 0 256000000 256000000
 			 0 0 0 0 0>;
 		status = "ok";
 	};
@@ -323,12 +295,7 @@
 			"ispif_ahb_clk", "csi_src_clk", "csiphy_clk_src",
 			"csi_clk", "csi_ahb_clk", "csi_rdi_clk",
 			"csi_pix_clk", "cphy_csid_clk";
-		/*modified by hufeng for can not take 20MP picture*/
-		/*
 		qcom,clock-rates = <0 0 0 0 0 0 0 310000000 200000000
-			 0 0 0 0 0>;
-		*/
-		qcom,clock-rates = <0 0 0 0 0 0 0 256000000 256000000
 			 0 0 0 0 0>;
 		status = "ok";
 	};

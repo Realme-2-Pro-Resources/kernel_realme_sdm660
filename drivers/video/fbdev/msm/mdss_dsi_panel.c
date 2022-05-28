@@ -781,7 +781,8 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 		* add for lcd power timing
 		*/
 		if (!pinfo->cont_splash_enabled) {
-			if (is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+			if (is_lcd(OPPO18136_HIMAX_NT36772A_1080_2340_VOD_PANEL)
+				|| is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
 				|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL))
 			{
 				mdelay(TPS65132_DELAY_3MS);
@@ -928,7 +929,8 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 			gpio_free(ctrl_pdata->lcd_mode_sel_gpio);
 		}
 		#else /*CONFIG_PRODUCT_REALME*/
-		if(is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		if(is_lcd(OPPO18136_HIMAX_NT36772A_1080_2340_VOD_PANEL)
+			|| is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
 			|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL))
 		{
 			if((0 != mdss_tp_black_gesture_status())&& lcd_esd_status){
@@ -1502,6 +1504,7 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 	#ifdef CONFIG_PRODUCT_REALME
 	//add for lcd cabc
 	if(is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18136_HIMAX_NT36772A_1080_2340_VOD_PANEL)
 		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL))
 	{
 		lcd_esd_status = 1;
@@ -3655,6 +3658,9 @@ int mdss_dsi_panel_init(struct device_node *node,
 	if(!strcmp(panel_name,"oppo18316himax hx83112a 1080 2340 video mode dsi panel")) {
 		lcd_vendor = OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL;
 		pr_err("%s:lcd_dev is oppo18316himax hx83312a 1080 2340 video mode dsi panel\n", __func__);
+	} else if(!strcmp(panel_name,"oppo18316himax nt36672 1080 2340 video mode dsi panel")) {
+		lcd_vendor = OPPO18136_HIMAX_NT36772A_1080_2340_VOD_PANEL;
+		pr_err("%s:lcd_dev is oppo18316himax nt36672 1080 2340 video mode dsi panel\n", __func__);
 	} else if(!strcmp(panel_name,"oppo18321dpt nt36672a 1080 2340 video mode dsi panel")) {
 		lcd_vendor = OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL;
 		pr_err("%s:lcd_dev is oppo18321dpt nt36672a 1080 2340 video mode dsi panel\n", __func__);

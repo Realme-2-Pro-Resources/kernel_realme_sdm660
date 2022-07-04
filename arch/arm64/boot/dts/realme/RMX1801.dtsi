@@ -28,12 +28,7 @@
 
 &firmware {
     android {
-        fstab {
-            vendor {
-                mnt_flags = "ro,barrier=1,async_discard";
-                fsmgr_flags = "wait";
-            };
-        };
+        /delete-node/ fstab;
     };
 };
 

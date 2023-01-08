@@ -313,7 +313,7 @@ static ssize_t wakelock_enable_set(struct device *dev,
                         wake_unlock(&fpc1020->fpc_wl);
                         /*dev_info(dev, "%s, fpc wake_unlock\n", __func__);*/
                 } else if (op == WAKELOCK_TIMEOUT_ENABLE) {
-                        wake_lock_timeout(&fpc1020->ttw_wl, msecs_to_jiffies(FPC_TTW_HOLD_TIME));
+                        wake_lock_timeout(&fpc1020->ttw_wl, FPC_TTW_HOLD_TIME);
                         /*dev_info(dev, "%s, fpc wake_lock timeout\n", __func__);*/
                 } else if (op == WAKELOCK_TIMEOUT_DISABLE) {
                         wake_unlock(&fpc1020->ttw_wl);
@@ -366,7 +366,7 @@ static irqreturn_t fpc1020_irq_handler(int irq, void *handle)
            }
            */
 
-        wake_lock_timeout(&fpc1020->fpc_irq_wl, msecs_to_jiffies(FPC_IRQ_WAKELOCK_TIMEOUT));
+        wake_lock_timeout(&fpc1020->fpc_irq_wl, FPC_IRQ_WAKELOCK_TIMEOUT);
 
         sysfs_notify(&fpc1020->dev->kobj, NULL, dev_attr_irq.attr.name);
 

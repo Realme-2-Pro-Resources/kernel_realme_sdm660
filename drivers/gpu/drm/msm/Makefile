@@ -1,5 +1,3 @@
-subdir-ccflags-y := -finline-functions -ftree-vectorize -funroll-loops
-
 ccflags-y := -Iinclude/drm -Idrivers/gpu/drm/msm -Idrivers/gpu/drm/msm/dsi-staging
 ccflags-y += -Idrivers/gpu/drm/msm/hdmi
 ccflags-y += -Idrivers/gpu/drm/msm/hdmi-staging

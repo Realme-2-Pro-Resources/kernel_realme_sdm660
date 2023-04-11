@@ -1,0 +1,80 @@
+/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/* diff with msm-audio.dtsi */
+&dai_mi2s0 {
+    qcom,msm-mi2s-rx-lines = <1>;
+    pinctrl-names = "default", "sleep";
+
+    pinctrl-0 = <&pri_mi2s_active
+        &pri_mi2s_mclk_active
+        &pri_mi2s_ws_active
+        &pri_mi2s_sd0_active>;
+
+    pinctrl-1 = <&pri_mi2s_sleep
+        &pri_mi2s_mclk_sleep
+        &pri_mi2s_ws_sleep
+        &pri_mi2s_sd0_sleep>;
+};
+
+&dai_mi2s1 {
+    qcom,msm-mi2s-tx-lines = <2>;
+
+    pinctrl-names = "default", "sleep";
+    pinctrl-0 = <&sec_mi2s_active
+            &sec_mi2s_sd0_active
+            &sec_mi2s_sd1_active>;
+
+    pinctrl-1 = <&sec_mi2s_sleep
+            &sec_mi2s_sd0_sleep
+            &sec_mi2s_sd1_sleep>;
+};
+
+&hostless {
+    audio_test_mod {
+        compatible = "qcom,audio-test-mod";
+    };
+};
+
+&tasha_snd {
+    status = "disabled";
+};
+
+&tavil_snd {
+    status = "disabled";
+};
+
+&int_codec {
+    /delete-property/ status;
+    qcom,wsa-disable;
+    qcom,msm-mi2s-master = <0>, <1>, <0>, <0>;
+    qcom,msm-mi2s-ext-mclk = <1>,<0>,<0>,<0>;
+    qcom,msm-mbhc-gnd-swh = <0>;
+    qcom,msm-micbias1-ext-cap;
+    oppo,headphone-pa = "akm";
+    oppo,speaker-pa = "nxp";
+};
+
+/* diff with sdm660-audio.dtsi */
+&pmic_analog_codec {
+    status = "okay";
+
+    qcom,cdc-micbias-cfilt-mv = <2700000>;
+};
+
+&slim_aud {
+    status = "disabled";
+};
+
+&wcd934x_cdc {
+    status = "disabled";
+};

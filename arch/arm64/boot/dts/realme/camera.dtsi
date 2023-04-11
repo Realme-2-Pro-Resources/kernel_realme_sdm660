@@ -1,0 +1,450 @@
+/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/* diff with sdm660-camera-sensor-mtp.dtsi */
+&led_flash0 {
+    qcom,flash-name = "pmic";
+    qcom,flash-source = <&pm660l_flash0>;
+    qcom,torch-source = <&pm660l_torch0>;
+};
+
+&soc {
+    /delete-node/ qcom,camera-flash@1;
+};
+
+&cam_avdd_gpio_regulator {
+    /delete-property/ gpio;
+};
+
+&cam_dvdd_gpio_regulator {
+    gpio = <&pm660l_gpios 7 0>;
+};
+
+&actuator0 {
+    /delete-property/ cam_vaf-supply;
+    /delete-property/ qcom,cam-vreg-name;
+    /delete-property/ qcom,cam-vreg-min-voltage;
+    /delete-property/ qcom,cam-vreg-max-voltage;
+    /delete-property/ qcom,cam-vreg-op-mode;
+
+    gpios = <&tlmm 1 0>;
+    qcom,gpio-vaf = <0>;
+    qcom,gpio-req-tbl-num = <0>;
+    qcom,gpio-req-tbl-flags = <0>;
+    qcom,gpio-req-tbl-label = "CAM_VAF";
+    pinctrl-names = "cam_default", "cam_suspend";
+    pinctrl-0 = <&cam_actuator_vaf_active>;
+    pinctrl-1 = <&cam_actuator_vaf_suspend>;
+};
+
+&actuator1 {
+    /delete-property/ cam_vaf-supply;
+    /delete-property/ qcom,cam-vreg-name;
+    /delete-property/ qcom,cam-vreg-min-voltage;
+    /delete-property/ qcom,cam-vreg-max-voltage;
+    /delete-property/ qcom,cam-vreg-op-mode;
+
+    gpios = <&tlmm 50 0>;
+    qcom,gpio-vaf = <0>;
+    qcom,gpio-req-tbl-num = <0>;
+    qcom,gpio-req-tbl-flags = <0>;
+    qcom,gpio-req-tbl-label = "CAM_VAF";
+    pinctrl-names = "cam_default", "cam_suspend";
+    pinctrl-0 = <&cam_actuator_vaf_active>;
+    pinctrl-1 = <&cam_actuator_vaf_suspend>;
+};
+
+&actuator2 {
+    /delete-property/ cam_vaf-supply;
+    /delete-property/ qcom,cam-vreg-name;
+    /delete-property/ qcom,cam-vreg-min-voltage;
+    /delete-property/ qcom,cam-vreg-max-voltage;
+    /delete-property/ qcom,cam-vreg-op-mode;
+
+    gpios = <&tlmm 1 0>;
+    qcom,gpio-vaf = <0>;
+    qcom,gpio-req-tbl-num = <0>;
+    qcom,gpio-req-tbl-flags = <0>;
+    qcom,gpio-req-tbl-label = "CAM_VAF";
+    pinctrl-names = "cam_default", "cam_suspend";
+    pinctrl-0 = <&cam_actuator_vaf_active>;
+    pinctrl-1 = <&cam_actuator_vaf_suspend>;
+};
+
+&eeprom0 {
+    /delete-property/ cam_vana-supply;
+    /delete-property/ cam_vdig-supply;
+    /delete-property/ qcom,gpio-no-mux;
+    /delete-property/ qcom,gpio-reset;
+    /delete-property/ qcom,gpio-vaf;
+    /delete-property/ qcom,sensor-position;
+    /delete-property/ qcom,sensor-mode;
+
+    qcom,eeprom-name = "imx398_cat24c64";
+    position = <0x00>;
+    qcom,slave-addr = <0xa0>;
+    qcom,num-blocks = <1>;
+    qcom,i2c-freq-mode =<1>;
+    qcom,page0 = <0 0 0 0 0 0>;
+    qcom,poll0 = <0 0 0 0 0 0>;
+    qcom,saddr0 = <0xa0>;
+    qcom,mem0 = <8192 0x0000 2 0 1 0>;
+    qcom,cam-vreg-name = "cam_vio";
+    qcom,cam-vreg-min-voltage = <0>;
+    qcom,cam-vreg-max-voltage = <0>;
+    qcom,cam-vreg-op-mode = <0>;
+    pinctrl-0 = <&cam_sensor_rear_active>;
+    pinctrl-1 = <&cam_sensor_rear_suspend>;
+    gpios = <&pm660l_gpios 4 0>;
+    qcom,gpio-vio = <0>;
+    qcom,gpio-req-tbl-num = <0>;
+    qcom,gpio-req-tbl-flags = <0>;
+    qcom,gpio-req-tbl-label = "CAM_VIO";
+
+    qcom,cam-power-seq-type = "sensor_vreg";
+    qcom,cam-power-seq-val = "cam_vio";
+    qcom,cam-power-seq-cfg-val = <1>;
+    qcom,cam-power-seq-delay = <1>;
+    clocks = <&clock_mmss MCLK2_CLK_SRC>,
+             <&clock_mmss MMSS_CAMSS_MCLK2_CLK>;
+};
+
+&eeprom1 {
+    /delete-property/ cam_vana-supply;
+    /delete-property/ cam_vdig-supply;
+    /delete-property/ qcom,gpio-no-mux;
+    /delete-property/ qcom,gpio-reset;
+    /delete-property/ qcom,sensor-position;
+    /delete-property/ qcom,sensor-mode;
+
+    reg = <1>;
+    qcom,eeprom-name = "imx371_m24c64s";
+    position = <0x01>;
+    qcom,slave-addr = <0xa2>;
+    qcom,num-blocks = <1>;
+    qcom,i2c-freq-mode =<1>;
+    qcom,page0 = <0 0 0 0 0 0>;
+    qcom,poll0 = <0 0 0 0 0 0>;
+    qcom,saddr0 = <0xa2>;
+    qcom,mem0 = <8192 0x0000 2 0 1 0>;
+    qcom,cam-vreg-name = "cam_vio";
+    qcom,cam-vreg-min-voltage = <0>;
+    qcom,cam-vreg-max-voltage = <0>;
+    qcom,cam-vreg-op-mode = <0>;
+
+    pinctrl-0 = <&cam_sensor_front_active>;
+    pinctrl-1 = <&cam_sensor_front_suspend>;
+    gpios = <&pm660l_gpios 4 0>;
+    qcom,gpio-vio = <0>;
+    qcom,gpio-req-tbl-num = <0>;
+    qcom,gpio-req-tbl-flags = <0>;
+    qcom,gpio-req-tbl-label = "CAM_VIO";
+
+    qcom,cam-power-seq-type = "sensor_vreg";
+    qcom,cam-power-seq-val = "cam_vio";
+    qcom,cam-power-seq-cfg-val = <1>;
+    qcom,cam-power-seq-delay = <1>;
+    qcom,cci-master = <0>;
+    clocks = <&clock_mmss MCLK1_CLK_SRC>,
+             <&clock_mmss MMSS_CAMSS_MCLK1_CLK>;
+};
+
+&eeprom2 {
+    /delete-property/ cam_vana-supply;
+    /delete-property/ cam_vdig-supply;
+    /delete-property/ qcom,gpio-reset;
+    /delete-property/ qcom,gpio-vana;
+    /delete-property/ qcom,gpio-vaf;
+    /delete-property/ qcom,sensor-position;
+    /delete-property/ qcom,sensor-mode;
+
+    qcom,eeprom-name = "imx350_cat24c64";
+    position = <0x02>;
+    qcom,slave-addr = <0xa8>;
+    qcom,num-blocks = <1>;
+    qcom,i2c-freq-mode =<1>;
+    qcom,page0 = <0 0 0 0 0 0>;
+    qcom,poll0 = <0 0 0 0 0 0>;
+    qcom,saddr0 = <0xa8>;
+    qcom,mem0 = <8192 0x0000 2 0 1 0>;
+    qcom,cam-vreg-name = "cam_vio";
+    qcom,cam-vreg-min-voltage = <0>;
+    qcom,cam-vreg-max-voltage = <0>;
+    qcom,cam-vreg-op-mode = <0>;
+    pinctrl-0 = <&cam_sensor_mclk1_active
+				 &cam_sensor_rear2_active>;
+    pinctrl-1 = <&cam_sensor_mclk1_suspend
+                 &cam_sensor_rear2_suspend>;
+    gpios = <&pm660l_gpios 4 0>;
+    qcom,gpio-vio = <0>;
+    qcom,gpio-req-tbl-num = <0>;
+    qcom,gpio-req-tbl-flags = <0>;
+    qcom,gpio-req-tbl-label = "CAM_VIO";
+    qcom,cam-power-seq-type = "sensor_vreg";
+    qcom,cam-power-seq-val = "cam_vio";
+    qcom,cam-power-seq-cfg-val = <1>;
+    qcom,cam-power-seq-delay = <1>;
+};
+
+&cci {
+    /delete-node/ qcom,camera@3;
+
+    eeprom3: qcom,eeprom@3 {
+		cell-index = <2>;
+		reg = <0x3>;
+		compatible = "qcom,eeprom";
+		qcom,eeprom-name = "imx350_gt24c64s";
+		position = <0x02>;
+		qcom,slave-addr = <0xa2>;
+		qcom,num-blocks = <1>;
+		qcom,i2c-freq-mode =<1>;
+		qcom,page0 = <0 0 0 0 0 0>;
+		qcom,poll0 = <0 0 0 0 0 0>;
+		qcom,saddr0 = <0xa2>;
+                qcom,mem0 = <8192 0x0000 2 0 1 0>;
+		cam_vio-supply = <&pm660_l11>;
+		qcom,cam-vreg-name = "cam_vio";
+		qcom,cam-vreg-min-voltage = <0>;
+		qcom,cam-vreg-max-voltage = <0>;
+		qcom,cam-vreg-op-mode = <0>;
+		qcom,gpio-no-mux = <0>;
+		pinctrl-names = "cam_default", "cam_suspend";
+		pinctrl-0 = <&cam_sensor_mclk1_active
+				 &cam_sensor_rear2_active>;
+		pinctrl-1 = <&cam_sensor_mclk1_suspend
+				 &cam_sensor_rear2_suspend>;
+		gpios = <&pm660l_gpios 7 0>;
+		qcom,gpio-vio = <0>;
+		qcom,gpio-req-tbl-num = <0>;
+		qcom,gpio-req-tbl-flags = <0>;
+		qcom,gpio-req-tbl-label = "CAM_VIO";
+		qcom,cam-power-seq-type = "sensor_vreg";
+		qcom,cam-power-seq-val = "cam_vio";
+		qcom,cam-power-seq-cfg-val = <1>;
+		qcom,cam-power-seq-delay = <1>;
+		qcom,cci-master = <1>;
+		status = "ok";
+		clocks = <&clock_mmss MCLK1_CLK_SRC>,
+                 <&clock_mmss MMSS_CAMSS_MCLK1_CLK>;
+		clock-names = "cam_src_clk", "cam_clk";
+		qcom,clock-rates = <24000000 0>;
+	};
+
+	eeprom4: qcom,eeprom@4 {
+		cell-index = <4>;
+		reg = <3>;
+		compatible = "qcom,eeprom";
+		qcom,eeprom-name = "s5k2p7sq_cat24c64";
+		position = <0x00>;
+		qcom,slave-addr = <0xa0>;
+		qcom,num-blocks = <1>;
+		qcom,i2c-freq-mode =<1>;
+		qcom,page0 = <0 0 0 0 0 0>;
+		qcom,poll0 = <0 0 0 0 0 0>;
+		qcom,saddr0 = <0xa0>;
+		qcom,mem0 = <8192 0x0000 2 0 1 0>;
+		cam_vio-supply = <&pm660_l11>;
+		qcom,cam-vreg-name = "cam_vio";
+		qcom,cam-vreg-min-voltage = <0>;
+		qcom,cam-vreg-max-voltage = <0>;
+		qcom,cam-vreg-op-mode = <0>;
+
+		pinctrl-names = "cam_default", "cam_suspend";
+		pinctrl-0 = <&cam_sensor_rear_active>;
+		pinctrl-1 = <&cam_sensor_rear_suspend>;
+		gpios = <&pm660l_gpios 4 0>;
+		qcom,gpio-vio = <0>;
+		qcom,gpio-req-tbl-num = <0>;
+		qcom,gpio-req-tbl-flags = <0>;
+		qcom,gpio-req-tbl-label = "CAM_VIO";
+
+		qcom,cam-power-seq-type = "sensor_vreg";
+		qcom,cam-power-seq-val = "cam_vio";
+		qcom,cam-power-seq-cfg-val = <1>;
+		qcom,cam-power-seq-delay = <1>;
+		qcom,cci-master = <0>;
+		status = "ok";
+		clocks = <&clock_mmss MCLK0_CLK_SRC>,
+				 <&clock_mmss MMSS_CAMSS_MCLK0_CLK>;
+		clock-names = "cam_src_clk", "cam_clk";
+		qcom,clock-rates = <24000000 0>;
+	};
+
+	eeprom5: qcom,eeprom@5 {
+		cell-index = <5>;
+		reg = <0x5>;
+		compatible = "qcom,eeprom";
+		qcom,eeprom-name = "s5k2t7sx_cat24c64";
+		position = <0x02>;
+		qcom,slave-addr = <0xa2>;
+		qcom,num-blocks = <1>;
+		qcom,i2c-freq-mode =<1>;
+		qcom,page0 = <0 0 0 0 0 0>;
+		qcom,poll0 = <0 0 0 0 0 0>;
+		qcom,saddr0 = <0xa2>;
+		qcom,mem0 = <8192 0x0000 2 0 1 0>;
+		cam_vio-supply = <&pm660_l11>;
+		qcom,cam-vreg-name = "cam_vio";
+		qcom,cam-vreg-min-voltage = <0>;
+		qcom,cam-vreg-max-voltage = <0>;
+		qcom,cam-vreg-op-mode = <0>;
+		qcom,gpio-no-mux = <0>;
+		pinctrl-names = "cam_default", "cam_suspend";
+		pinctrl-0 = <&cam_sensor_mclk1_active
+                     &cam_sensor_rear2_active>;
+		pinctrl-1 = <&cam_sensor_mclk1_suspend
+                     &cam_sensor_rear2_suspend>;
+		gpios = <&pm660l_gpios 7 0>;
+		qcom,gpio-vio = <0>;
+		qcom,gpio-req-tbl-num = <0>;
+		qcom,gpio-req-tbl-flags = <0>;
+		qcom,gpio-req-tbl-label = "CAM_VIO";
+		qcom,cam-power-seq-type = "sensor_vreg";
+		qcom,cam-power-seq-val = "cam_vio";
+		qcom,cam-power-seq-cfg-val = <1>;
+		qcom,cam-power-seq-delay = <1>;
+		qcom,cci-master = <1>;
+		status = "ok";
+		clocks = <&clock_mmss MCLK1_CLK_SRC>,
+                 <&clock_mmss MMSS_CAMSS_MCLK1_CLK>;
+		clock-names = "cam_src_clk", "cam_clk";
+		qcom,clock-rates = <24000000 0>;
+	};
+
+	qcom,camera@0 {
+        /delete-property/ qcom,ois-src;
+
+		reg = <0x00>;
+		qcom,csiphy-sd-index = <2>;
+        cam_vana-supply = <&pm660l_bob>;
+		cam_vdig-supply = <&pm660_s5>;
+        qcom,cam-vreg-min-voltage = <1780000 3300000 1350000>;
+		qcom,cam-vreg-max-voltage = <1950000 3600000 1350000>;
+		qcom,cam-vreg-op-mode = <105000 80000 105000>;
+        pinctrl-0 = <&cam_sensor_mclk2_active
+                     &cam_sensor_rear_active>;
+		pinctrl-1 = <&cam_sensor_mclk2_suspend
+                     &cam_sensor_rear_suspend>;
+		gpios = <&tlmm 34 0>,
+                <&tlmm 47 0>,
+                <&pm660l_gpios 4 0>,
+                <&tlmm 50 0>;
+        qcom,gpio-vdig = <2>;
+		qcom,gpio-vana = <3>;
+		qcom,gpio-req-tbl-num = <0 1 2 3 >;
+		qcom,gpio-req-tbl-flags = <1 0 0 0>;
+		qcom,gpio-req-tbl-label = "CAMIF_MCLK1",
+					"CAM_RESET0",
+					"CAM_VDIG",
+					"CAM_VANA";
+        clocks = <&clock_mmss MCLK2_CLK_SRC>,
+                 <&clock_mmss MMSS_CAMSS_MCLK2_CLK>;
+	};
+
+	qcom,camera@1 {
+		/delete-property/ qcom,led-flash-src;
+		/delete-property/ qcom,actuator-src;
+
+        cam_vana-supply = <&pm660l_bob>;
+		cam_vdig-supply = <&pm660_s5>;
+        qcom,cam-vreg-min-voltage = <1780000 3300000 1350000>;
+		qcom,cam-vreg-max-voltage = <1950000 3600000 1350000>;
+		qcom,cam-vreg-op-mode = <105000 80000 105000>;
+        pinctrl-0 = <&cam_sensor_mclk1_active
+                     &cam_sensor_front_active>;
+		pinctrl-1 = <&cam_sensor_mclk1_suspend
+                     &cam_sensor_front_suspend>;
+		gpios = <&tlmm 33 0>,
+                <&tlmm 46 0>,
+                <&pm660l_gpios 4 0>,
+                <&tlmm 35 0>;
+		qcom,gpio-vdig = <2>;
+		qcom,gpio-vana = <3>;
+		qcom,gpio-req-tbl-num = <0 1 2 3>;
+		qcom,gpio-req-tbl-flags = <1 0 0 0>;
+		qcom,gpio-req-tbl-label = "CAMIF_MCLK",
+					  "CAM_RESET",
+					  "CAM_VDIG",
+					  "CAM_VANA";
+		qcom,sensor-position = <1>;
+        qcom,cci-master = <0>;
+        clocks = <&clock_mmss MCLK1_CLK_SRC>,
+                 <&clock_mmss MMSS_CAMSS_MCLK1_CLK>;
+	};
+
+	qcom,camera@2 {
+        /delete-property/ qcom,actuator-src;
+        /delete-property/ qcom,eeprom-src;
+
+		qcom,csiphy-sd-index = <0>;
+		qcom,csid-sd-index = <1>;
+		qcom,mount-angle = <270>;
+		qcom,led-flash-src = <&led_flash0>;
+        cam_vana-supply = <&pm660l_bob>;
+		cam_vdig-supply = <&pm660_s5>;
+        qcom,cam-vreg-min-voltage = <1780000 3300000 1350000>;
+		qcom,cam-vreg-max-voltage = <1950000 3600000 1350000>;
+		qcom,cam-vreg-op-mode = <105000 80000 105000>;
+        pinctrl-0 = <&cam_sensor_mclk0_active
+                     &cam_sensor_rear2_active>;
+		pinctrl-1 = <&cam_sensor_mclk0_suspend
+                     &cam_sensor_rear2_suspend>;
+		gpios = <&tlmm 32 0>,
+                <&tlmm 48 0>,
+                <&tlmm 29 0>,
+                <&tlmm 64 0>,
+                <&tlmm 35 0>;
+        qcom,gpio-standby = <2>;
+		qcom,gpio-vdig = <3>;
+		qcom,gpio-vana = <4>;
+		qcom,gpio-req-tbl-num = <0 1 2 3 4>;
+		qcom,gpio-req-tbl-flags = <1 0 0 0 0>;
+		qcom,gpio-req-tbl-label = "CAMIF_MCLK0",
+					"CAM_RESET2",
+					"CAM_STANDBY2",
+					"CAM_VDIG",
+					"CAM_VANA";
+        clocks = <&clock_mmss MCLK0_CLK_SRC>,
+                 <&clock_mmss MMSS_CAMSS_MCLK0_CLK>;
+	};
+};
+
+/* diff with sdm660-camera.dtsi */
+&soc {
+    qcom,csiphy@c824000 {
+        qcom,clock-rates = <0 0 0 0 0 0 384000000 0 0 269333333 0 0 384000000 0 0>;
+    };
+
+    qcom,csiphy@c825000 {
+        qcom,clock-rates = <0 0 0 0 0 0 384000000 0 0 269333333 0 0 384000000 0 0>;
+    };
+
+    qcom,csiphy@c826000 {
+        qcom,clock-rates = <0 0 0 0 0 0 384000000 0 0 269333333 0 0 384000000 0 0>;
+    };
+
+    qcom,csid@ca30000 {
+        qcom,clock-rates = <0 0 0 0 0 0 0 384000000 384000000 0 0 0 0 0>;
+    };
+
+    qcom,csid@ca30400 {
+        qcom,clock-rates = <0 0 0 0 0 0 0 256000000 256000000 0 0 0 0 0>;
+    };
+
+    qcom,csid@ca30800 {
+        qcom,clock-rates = <0 0 0 0 0 0 0 256000000 256000000 0 0 0 0 0>;
+    };
+
+    qcom,csid@ca30c00 {
+        qcom,clock-rates = <0 0 0 0 0 0 0 256000000 256000000 0 0 0 0 0>;
+    };
+};

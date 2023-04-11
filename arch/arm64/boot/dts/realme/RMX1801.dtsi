@@ -1,0 +1,208 @@
+/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "pm660.dtsi"
+#include "audio.dtsi"
+#include "camera.dtsi"
+#include "mdss.dtsi"
+#include "mtp.dtsi"
+#include "pinctrl.dtsi"
+
+/* diff with sdm660.dtsi */
+&removed_regions {
+    reg = <0x0 0x85800000 0x0 0x5300000>;
+};
+
+&adsp_fw_mem {
+    reg = <0x0 0x92a00000 0x0 0x2000000>; //increase 2M, 30M -> 32M
+};
+
+&firmware {
+    android {
+        fstab {
+            vendor {
+                mnt_flags = "ro,barrier=1,async_discard";
+                fsmgr_flags = "wait";
+            };
+        };
+    };
+};
+
+&mem_client_3_size {
+    /delete-property/ qcom,allocate-on-request;
+    qcom,allocate-boot-time;
+};
+
+&pm660l_gpios {
+    /* GPIO 3 for VOL_UP */
+	gpio@c200 {
+		status = "ok";
+		qcom,mode = <1>;
+		qcom,pull = <5>;
+		qcom,out-strength = <1>;
+	};
+	
+	/* GPIO 5 for VOL_DOWN */
+	gpio@c400 {
+		status = "okay";
+		qcom,mode = <0>;
+		qcom,pull = <0>;
+		qcom,vin-sel = <0>;
+		qcom,src-sel = <0>;
+		qcom,out-strength = <1>;
+	};
+};
+
+&qcom_seecom {
+    reg = <0x86d00000 0x03E00000>;
+};
+
+&soc {
+    /delete-node/ qcom,qbt1000;
+    /delete-node/ qcom,bcl;
+
+    gpio_keys {
+        /delete-property/ pinctrl-names;
+        /delete-property/ pinctrl-0;
+        /delete-property/ pinctrl-1;
+        /delete-node/ camera_focus;
+        /delete-node/ camera_snapshot;
+
+        vol_up {
+            gpios = <&pm660l_gpios 3 0x1>;
+        };
+
+        vol_down {
+			label = "volume_down";
+			gpios = <&pm660l_gpios 5 0x1>;
+			linux,input-type = <1>;
+			linux,code = <114>;
+			gpio-key,wakeup;
+			debounce-interval = <15>;
+		};
+    };
+};
+
+&wdog {
+    qcom,bark-time = <20000>;
+};
+
+/* diff with sdm660-blsp.dtsi */
+&i2c_2 {
+    status = "okay";
+};
+
+&i2c_4 {
+    /delete-property/ pinctrl-names;
+    /delete-property/ pinctrl-0;
+    /delete-property/ pinctrl-1;
+    /delete-property/ pinctrl-2;
+};
+
+&i2c_6 {
+    status = "okay";
+};
+
+/* diff with sdm660-internal-codec.dtsi */
+&cdc_sdw_gpios {
+	status = "disabled";
+};
+
+&wsa_spkr_en1 {
+	status = "disabled";
+};
+
+&wsa_spkr_en2 {
+	status = "disabled";
+};
+
+&msm_sdw_codec {
+	status = "disabled";
+};
+
+/* diff with sdm660-regulator.dtsi */
+&pm660l_bob {
+    /delete-property/ qcom,pwm-threshold-current;
+    qcom,bob-pwm-threshold-current = <2000000>;
+};
+
+&pm660l_bob_pin1 {
+    /delete-property/ qcom,pwm-threshold-current;
+    qcom,bob-pwm-threshold-current = <2000000>;
+};
+
+&pm660l_bob_pin2 {
+    /delete-property/ qcom,pwm-threshold-current;
+    qcom,bob-pwm-threshold-current = <2000000>;
+};
+
+&pm660l_bob_pin3 {
+    /delete-property/ qcom,pwm-threshold-current;
+    qcom,bob-pwm-threshold-current = <2000000>;
+};
+
+&soc {
+    sdhc2_vdd_vreg: sdhc2_vdd_vreg {
+        compatible = "regulator-fixed";
+        regulator-name = "sdhc2_vdd_vreg";
+        startup-delay-us = <0>;
+        enable-active-high;
+        gpio = <&tlmm 52 0>;
+    };
+
+    touchpanel_vdd: touchpanel_vdd {
+        compatible = "regulator-fixed";
+        regulator-name = "touchpanel_vdd";
+        startup-delay-us = <0>;
+        enable-active-high;
+        gpio = <&tlmm 15 0>;
+    };
+};
+
+/* diff with sdm660-coresight.dtsi */
+&cti2 {
+    /delete-property/ pinctrl-names;
+    /delete-property/ pinctrl-0;
+};
+
+/* diff with sdm660-common.dtsi */
+&qusb_phy0 {
+    qcom,qusb-phy-init-seq = <0x78 0x80
+        0x70 0x84
+        0x81 0x88
+        0xc7 0x8c
+        0x30 0x08
+        0x79 0x0c
+        0x21 0x10
+        0x14 0x9c
+        0x9f 0x1c
+        0x00 0x18>;
+};
+
+&ssphy {
+    status = "disabled";
+};
+
+&usb3 {
+    extcon = <&pm660_charger>;
+    vbus_dwc3-supply = <&smb2_vbus>;
+
+    dwc3@a800000 {
+        usb-phy = <&qusb_phy0>, <&usb_nop_phy>;
+        maximum-speed = "high-speed";
+    };
+};
+
+/* diff with stock f12 dts */
+&cont_splash_mem {
+    reg = <0x00 0x9d400000 0x00 0x2300000>;
+};

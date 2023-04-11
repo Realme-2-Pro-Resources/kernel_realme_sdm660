@@ -1,0 +1,241 @@
+/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/* Diff with msm-pm660.dtsi */
+&pm660_gpios{
+    gpio@c100 {
+        status = "ok";
+        qcom,master-en = <0>;
+    };
+};
+
+&pm660_rtc{
+    qcom,qpnp-rtc-alarm-pwrup = <1>;
+};
+
+&pm660_vadc{
+    chan@12{
+        label = "gpio2_adc";
+        reg = <0x12>; //channel for GPIO2
+        qcom,decimation = <2>;
+        qcom,pre-div-channel-scaling = <0>; //1:1 scaling
+        qcom,calibration-type = "absolute";
+        qcom,scale-function = <0>;
+        qcom,hw-settle-time = <2>;
+        qcom,fast-avg-setup = <0>;
+    };
+};
+
+&pm660_charger{
+    /delete-property/ qcom,wipower-max-uw;
+    status = "okay";
+    qcom,micro-usb;
+
+    pm660l_bob-supply = <&pm660l_bob>;
+
+    qcom,usb-icl-ua = <2000000>;
+    qcom,fcc-max-ua = <2000000>;
+    qcom,hvdcp-disable;
+    qcom,pm660chg-vadc = <&pm660_vadc>;
+    qcom,float-option = <1>;
+
+    qcom,input_current_charger_ma = <2000>;
+    qcom,input_current_usb_ma = <500>;
+    qcom,input_current_led_ma = <1200>;
+    qcom,input_current_led_ma_forcmcc = <500>;
+    qcom,input_current_camera_ma = <1200>;
+    qcom,input_current_led_ma_overtemp = <900>;
+    qcom,input_current_calling_ma = <1500>;
+    qcom,overtemp_bat_decidegc = <350>;
+    qcom,iterm-disabled = <0>;
+    qcom,iterm-ma = <200>;
+    qcom,recharge-mv = <100>;
+    qcom,batt_capacity_mah = <3415>;
+
+    qcom,removed_bat_decidegc = <190>;  			/*<-19C*/
+
+    qcom,cold_bat_decidegc = <30>;  /*-3C~0C*/
+    qcom,temp_cold_vfloat_mv = <3983>;
+    qcom,temp_cold_fastchg_current_ma = <350>;				/* 300~364 */
+
+    qcom,little_cold_bat_decidegc = <0>;	/*0C~5C*/
+    qcom,temp_little_cold_vfloat_mv = <4373>;
+    qcom,temp_little_cold_fastchg_current_ma = <500>;		/* 0.15C = 512 */
+
+    qcom,cool_bat_decidegc = <50>;	/*5C~12C*/
+    qcom,temp_cool_vfloat_mv = <4373>;
+    qcom,temp_cool_fastchg_current_ma_high = <850>;			/* 0.25C = 853 */
+    qcom,temp_cool_fastchg_current_ma_low = <500>;			/* 0.15C = 512 */
+
+    qcom,little_cool_bat_decidegc = <120>;	/*12C~22C*/
+    qcom,temp_little_cool_vfloat_mv = <4373>;
+    qcom,temp_little_cool_fastchg_current_ma = <1500>;		/* 0.45C = 1536 */
+
+    qcom,normal_bat_decidegc = <220>;	/*22C~45C*/
+    qcom,temp_normal_fastchg_current_ma = <2000>;
+    qcom,temp_normal_vfloat_mv_normalchg = <4373>;
+    qcom,temp_normal_vfloat_mv_voocchg = <4373>;
+
+    qcom,warm_bat_decidegc = <450>;		/*45C~53C*/			/* 8pin Bat Vooc project need add 3 temp */
+    qcom,temp_warm_vfloat_mv = <4080>;
+    qcom,temp_warm_fastchg_current_ma = <850>;				/* 0.25C = 853 */
+
+    qcom,hot_bat_decidegc = <530>;
+
+    qcom,non_standard_vfloat_mv = <3980>;
+    qcom,non_standard_fastchg_current_ma = <512>;
+
+    qcom,non_standard_vfloat_sw_limit = <3930>;
+    qcom,cold_vfloat_sw_limit = <3930>;
+    qcom,little_cold_vfloat_sw_limit = <4320>;
+    qcom,cool_vfloat_sw_limit = <4320>;
+    qcom,little_cool_vfloat_sw_limit = <4320>;
+    qcom,normal_vfloat_sw_limit = <4320>;
+    qcom,warm_vfloat_sw_limit = <4030>;
+    
+    qcom,short_c_bat_cv_mv = <4330>;
+    qcom,short_c_bat_vfloat_mv = <3800>;
+    qcom,short_c_bat_fastchg_current_ma = <512>;
+    qcom,short_c_bat_vfloat_sw_limit = <3750>;
+    
+    qcom,max_chg_time_sec = <36000>;
+    qcom,charger_hv_thr = <5800>;
+    qcom,charger_lv_thr = <3400>;
+    qcom,vbatt_full_thr = <4400>;
+    qcom,vbatt_hv_thr = <4500>;
+    qcom,vfloat_step_mv = <10>;
+
+    qcom,non_standard_vfloat_over_sw_limit = <3993>;
+    qcom,cold_vfloat_over_sw_limit = <3993>;
+    qcom,little_cold_vfloat_over_sw_limit = <4383>;
+    qcom,cool_vfloat_over_sw_limit = <4383>;
+    qcom,little_cool_vfloat_over_sw_limit = <4383>;
+    qcom,normal_vfloat_over_sw_limit = <4383>;
+    qcom,warm_vfloat_over_sw_limit = <4093>;
+
+    qcom,check_batt_full_by_sw;
+    qcom,chg_ctrl_by_lcd;
+    qcom,chg_ctrl_by_camera;
+    qcom,chg_ctrl_by_calling;
+    qcom,sw_vfloat_over_protect_enable;
+
+    qcom,chargerid_switch-gpio = <&tlmm 65 0x00>;
+    qcom,usbid-gpio = <&tlmm 49 0x00>;
+    qcom,ship-gpio	= <&tlmm 98 0x00>;
+    qcom,shortc-gpio = <&tlmm 60 0x00>;
+    pinctrl-names = "chargerid_switch_active", "chargerid_switch_sleep", "chargerid_switch_default", "usbid_active", "usbid_sleep",
+        "ship_active", "ship_sleep", "shortc_active";
+    pinctrl-0 = <&chargerid_switch_active>;
+    pinctrl-1 = <&chargerid_switch_sleep>;
+    pinctrl-2 = <&chargerid_switch_default>;
+    pinctrl-3 = <&usbid_active>;
+    pinctrl-4 = <&usbid_sleep>;
+    pinctrl-5 = <&ship_active>;
+    pinctrl-6 = <&ship_sleep>;
+    pinctrl-7 = <&shortc_active>;
+};
+
+&pm660_pdphy{
+    status = "disabled";
+};
+
+&pm660_fg{
+    qcom,fg-esr-timer-asleep = <160 256>;
+    qcom,fg-rsense-sel = <1>;
+    qcom,fg-jeita-thresholds = <(-30) (-25) 90 95>;
+    qcom,battery-thermal-coefficients = [9d 50 ff];
+    qcom,slope-limit-temp-threshold = <10>;
+    qcom,slope-limit-coeffs = <1 1 1 1>;
+    qcom,fg-esr-tight-lt-filter-micro-pct = <20000>;
+    qcom,fg-esr-broad-lt-filter-micro-pct = <30000>;
+    qcom,fg-chg-term-current = <200>;
+    qcom,fg-sys-term-current = <250>;
+    qcom,hold-soc-while-full;
+};
+
+&pm660_haptics{
+    /delete-property/ qcom,en-brake;
+    qcom,actuator-type = "erm";
+    qcom,vib-timemin-ms = <35>;
+};
+
+&spmi_bus {
+    qcom,pm660@0 {
+        /delete-node/ bcl@4200;
+
+        qcom,power-on@800 {
+            qcom,clear-warm-reset;
+        };
+    };
+};
+
+/* Diff with msm-pm660a.dtsi */
+&pm660l_wled {
+	status = "ok";
+};
+
+&pm660a_oledb {
+	status = "disabled";
+};
+
+&pm660a_labibb {
+	status = "disabled";
+};
+
+/* Diff with msm-pm660l.dtsi */
+&green_led{
+    linux,name = "button-backlight";
+};
+
+&blue_led{
+    qcom,max-current = <3>;
+    qcom,start-idx = <1>;
+    qcom,duty-pcts = [00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14];
+    qcom,lut-flags = <0x1f>;
+    qcom,pause-lo = <2000>;
+    qcom,pause-hi = <700>;
+    qcom,ramp-step-ms = <35>;
+    qcom,ratio = <20>;
+    qcom,use-blink;
+    linux,name = "white";
+};
+
+&pm660l_wled{
+    qcom,fs-curr-ua = <20000>;
+    qcom,en-cabc;
+};
+
+&pm660l_flash0{
+    qcom,current-ma = <750>;
+};
+
+&pm660l_flash1{
+    qcom,current-ma = <750>;
+};
+
+&pm660l_torch0{
+    qcom,current-ma = <108>;
+};
+
+&pm660l_torch1{
+    qcom,current-ma = <108>;
+};
+
+&pm660l_torch2{
+    qcom,current-ma = <180>;
+};
+
+&pm660l_3{
+    qcom,leds@d000{
+        /delete-node/ qcom,rgb_0;
+    };
+};

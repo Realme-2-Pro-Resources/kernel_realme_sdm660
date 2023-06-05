@@ -1133,8 +1133,16 @@ static void mmc_sd_remove(struct mmc_host *host)
 	mmc_exit_clk_scaling(host);
 	mmc_remove_card(host->card);
 
+#ifdef CONFIG_PRODUCT_REALME_RMX1801
+/*yixue.ge@psw.bsp.kernel 2017-07-31
+   modify for bug 1061371 bad tcard can make system creash
+*/
+	host->card = NULL;
+    mmc_claim_host(host);
+#else /*CONFIG_PRODUCT_REALME_RMX1801*/
 	mmc_claim_host(host);
 	host->card = NULL;
+#endif /*CONFIG_PRODUCT_REALME_RMX1801*/
 	mmc_release_host(host);
 }
 

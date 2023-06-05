@@ -428,6 +428,11 @@ obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
 obj-y += sdm660_cdc/
 obj-y += msm_sdw/
 
+#ifdef CONFIG_PRODUCT_REALME_RMX1801
+#xiang.fei@PSW.MM.AudioDriver.SmartPA, 2017/01/13, Add for nxp speaker
+obj-y += tfa98xx/
+#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
+
 # TODO: remove me b/62058353
 subdir-ccflags-y += \
 	-Wno-enum-conversion

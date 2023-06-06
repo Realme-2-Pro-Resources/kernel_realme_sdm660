@@ -47,6 +47,21 @@
 #include <linux/string.h>
 #include "../include/oppo_fp_common.h"
 
+#if CONFIG_OPPO_FINGERPRINT_PLATFORM == 6763 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 6771 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 6779 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 6873
+#include <sec_boot_lib.h>
+#include <linux/uaccess.h>
+#elif CONFIG_OPPO_FINGERPRINT_PLATFORM == 855 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 6125 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 7150 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 7250 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 6885 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 8250 || CONFIG_OPPO_FINGERPRINT_PLATFORM == 7125
+#include <linux/uaccess.h>
+#else
+#include <soc/qcom/smem.h>
+#endif
+
+#define FP_GPIO_NODE           "oppo,fp_gpio"
+#define FP_ID_VALUE_NODE       "oppo,fp-id"
+#define FP_VENDOR_CHIP_NODE    "vendor-chip"
+#define FP_CHIP_NAME_NODE      "chip-name"
+#define FP_ENG_MENU_NODE       "eng-menu"
+
 #define CHIP_PRIMAX     "primax"
 #define CHIP_CT         "CT"
 #define CHIP_OFILM      "ofilm"
@@ -196,6 +211,28 @@ static int fp_gpio_parse_dts(struct fp_data *fp_data)
     if (ret) {
         ret = FP_ERROR_GPIO;
         goto exit;
+    }
+
+    for (fp_id_index = 0; fp_id_index < fp_data->fp_id_amount; fp_id_index++) {
+#if CONFIG_OPPO_FINGERPRINT_PLATFORM == 6873
+        fp_data->gpio_index[fp_id_index] = of_get_named_gpio(np, "oppo,fp_gpio_id",0);
+        if (fp_data->gpio_index[fp_id_index] < 0) {
+            dev_err(fp_data->dev, "the param %s is not found !\n", "oppo,fp_gpio_id");
+            ret = -FP_ERROR_GENERAL;
+            goto exit;
+        }
+        fp_data->fp_id[fp_id_index] = gpio_get_value(fp_data->gpio_index[fp_id_index]);
+        dev_info(fp_data->dev, "gpio_index: %d,fp_id: %d\n", fp_data->gpio_index[fp_id_index], fp_data->fp_id[fp_id_index]);
+#else
+        ret = of_property_read_u32_index(np, FP_GPIO_NODE, fp_id_index, &(fp_data->gpio_index[fp_id_index]));
+        if (ret) {
+            dev_err(fp_data->dev, "the param %s is not found !\n", FP_GPIO_NODE);
+            ret = -FP_ERROR_GENERAL;
+            goto exit;
+        }
+        fp_data->fp_id[fp_id_index] = gpio_get_value(fp_data->gpio_index[fp_id_index]);
+        dev_info(fp_data->dev, "gpio_index: %d,fp_id: %d\n", fp_data->gpio_index[fp_id_index], fp_data->fp_id[fp_id_index]);
+#endif
     }
 
     ret = fp_request_named_gpio(fp_data, "oppo,fp-id2",

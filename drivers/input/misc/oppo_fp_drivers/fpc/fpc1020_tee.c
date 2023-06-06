@@ -21,7 +21,7 @@
  **  Ziqing.guo                  2018/03/13                  add fix for coverity 21935, 21734 (Uninitialized scalar variable)
  **  Ran.Chen                    2018/06/26                  add for 1023_2060_GLASS
  **  Yang.Tan                    2018/11/09                  add for 18531 fpc1511
- **  Mingzhi.Guo                 2019/02/14                  add for 1023_2060_GLASS for 18321 android_p
+ **  Hongyu.Lu                   2019/04/19                  add for SM6125 fpc1511
  ************************************************************************************/
 
 #include <linux/clk.h>
@@ -502,7 +502,23 @@ static struct platform_driver fpc1020_driver = {
         },
         .probe = fpc1020_probe,
 };
-module_platform_driver(fpc1020_driver);
+
+static int __init fpc1020_init(void)
+{
+        if(platform_driver_register(&fpc1020_driver) ){
+                pr_err("platform_driver_register fail");
+                return -EINVAL;
+        }
+        return 0;
+}
+
+static void __exit fpc1020_exit(void)
+{
+        platform_driver_unregister(&fpc1020_driver);
+}
+
+late_initcall(fpc1020_init);
+module_exit(fpc1020_exit);
 
 MODULE_LICENSE("GPL v2");
 MODULE_AUTHOR("Aleksej Makarov");

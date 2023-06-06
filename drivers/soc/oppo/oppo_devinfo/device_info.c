@@ -179,12 +179,13 @@ static void dram_type_add(void)
 
 static int get_ant_select_gpio(struct devinfo_data *devinfo_data)
 {
-	int ret;
+	int ret=0;
 	struct device_node *np;	
-	pr_err("srd get_ant_select_gpio\n");
 	
-	np = devinfo_data->devinfo->dev.of_node;
-	if(!devinfo_data){
+	pr_err("srd get_ant_select_gpio\n");
+	if(devinfo_data != NULL && devinfo_data->devinfo !=NULL) {
+	    np = devinfo_data->devinfo->dev.of_node;
+	} else {
 		pr_err("devinfo_data is NULL\n");
 		return 0;
 	}
@@ -213,7 +214,7 @@ static int get_hw_opreator_version(struct devinfo_data *devinfo_data)
 	int id2 = -1;
 	int id3 = -1;
 	struct device_node *np;
-	
+
 	np = devinfo_data->devinfo->dev.of_node;
 	if(!devinfo_data){
 		pr_err("devinfo_data is NULL\n");
@@ -320,7 +321,7 @@ static void sub_mainboard_verify(struct devinfo_data *devinfo_data)
 	struct device_node *np;	
 	struct manufacture_info mainboard_info;
 	struct manufacture_info speaker_mainboard_info;
-	
+
 	if(!devinfo_data){
 		pr_err("devinfo_data is NULL\n");
 		return;
@@ -393,7 +394,7 @@ sub_mainboard_set:
 			if(id1 == 0)
 				snprintf(mainboard_info.manufacture, INFO_BUF_LEN, "%d-audio-china", get_project());
 		    else if(id1 == 1)
-				snprintf(mainboard_info.manufacture, INFO_BUF_LEN, "%d-audio-oversea", get_project());	
+				snprintf(mainboard_info.manufacture, INFO_BUF_LEN, "%d-audio-oversea", get_project()); 
 			else
 				mainboard_info.manufacture = "sub-UNSPECIFIED";
 			break;
@@ -401,6 +402,7 @@ sub_mainboard_set:
 		//Haitao.Zhou@BSP.Bootloader.Device, 2017/06/26, Add for 17011/17021
 		case OPPO_17011:
 		case OPPO_17021:
+		case OPPO_17081:
 		{
 			pr_err("id1 = %d,id2 = %d\n",id1,id2);
 			if(id1 == 1)
@@ -413,6 +415,25 @@ sub_mainboard_set:
 			if(id2 == 1)
 				snprintf(speaker_mainboard_info.manufacture, INFO_BUF_LEN, "%d-speaker-china", get_project());
 			else if(id2 == 0)
+				snprintf(speaker_mainboard_info.manufacture, INFO_BUF_LEN, "%d-speaker-oversea", get_project());
+			else
+				speaker_mainboard_info.manufacture = "sub-UNSPECIFIED";
+				register_device_proc("speaker_mainboard", speaker_mainboard_info.version, speaker_mainboard_info.manufacture);
+				break;
+		}
+		case OPPO_17085:
+		{
+			pr_err("id1 = %d, id2 = %d\n", id1, id2);
+			if (id1 == 0)
+				snprintf(mainboard_info.manufacture, INFO_BUF_LEN, "%d-audio-china", get_project());
+			else if (id1 == 1)
+				snprintf(mainboard_info.manufacture, INFO_BUF_LEN, "%d-audio-oversea", get_project());
+			else
+				mainboard_info.manufacture = "sub-UNSPECIFIED";
+
+			if (id1 == 0)
+				snprintf(speaker_mainboard_info.manufacture, INFO_BUF_LEN, "%d-speaker-china", get_project());
+			else if (id1 == 1)
 				snprintf(speaker_mainboard_info.manufacture, INFO_BUF_LEN, "%d-speaker-oversea", get_project());
 			else
 				speaker_mainboard_info.manufacture = "sub-UNSPECIFIED";
@@ -536,35 +557,6 @@ static void mainboard_verify(struct devinfo_data *devinfo_data)
 	}	
 	register_device_proc("mainboard", mainboard_info.version, mainboard_info.manufacture);	
 }
-
-//#ifdef CONFIG_PRODUCT_REALME_RMX1801//Fanhong.Kong@ProDrv.CHG,modified 2014.4.13 for 14027
-static void pa_verify(void)
-{
-	struct manufacture_info pa_info;
-
-	switch(get_Modem_Version()) {
-		case 0:		
-			pa_info.version = "0";
-			pa_info.manufacture = "RFMD PA";
-			break;
-		case 1:	
-			pa_info.version = "1";
-			pa_info.manufacture = "SKY PA";
-			break;
-		case 3:
-			pa_info.version = "3";
-			pa_info.manufacture = "AVAGO PA";
-			break;
-		default:	
-			pa_info.version = "UNKOWN";
-			pa_info.manufacture = "UNKOWN";
-	}
-			
-	register_device_proc("pa", pa_info.version, pa_info.manufacture);
-
-}
-//#endif /*CONFIG_PRODUCT_REALME_RMX1801*/	
-
 
 //#ifdef CONFIG_PRODUCT_REALME_RMX1801
 //rendong.shi@BSP.boot,2016/03/24,add for mainboard resource 
@@ -723,9 +715,6 @@ static int devinfo_probe(struct platform_device *pdev)
 	mainboard_verify(devinfo_data);
 	dram_type_add();
 	return ret;
-	/*Add devinfo for some devices*/
-	pa_verify();
-	/*end of Adding devinfo for some devices*/
 }
 
 static int devinfo_remove(struct platform_device *dev)

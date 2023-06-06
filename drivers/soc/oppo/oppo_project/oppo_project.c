@@ -354,6 +354,35 @@ struct file_operations ocp_proc_fops = {
         .read = ocplog_read_proc,
 };
 
+/*RPMB_KEY_PROVISIONED 24bit 0x780178 in the Anti-rollback*/
+/*This register must get from xxx_qfprom_programming_reference_guide.xlsm*/
+#define RPMB_KEY_PROVISIONED 0x00780178
+
+static unsigned int rpmbenable = 0;
+
+int rpmb_is_enable(void)
+{
+        static unsigned int rpmbtmp = 0;
+        void __iomem *rpmb_addr = NULL;
+
+        if (rpmbenable) {
+                return rpmbenable;
+        }
+        rpmb_addr = ioremap(RPMB_KEY_PROVISIONED , 4);
+        if (rpmb_addr) {
+                rpmbtmp = __raw_readl(rpmb_addr);
+                iounmap(rpmb_addr);
+                rpmbenable = (rpmbtmp >> 24) & 0x01;
+                /*printk(KERN_EMERG "rpmb 0x%x\n", rpmbenable);
+*/
+        } else {
+                rpmbenable = 0;
+        }
+
+        return rpmbenable;
+}
+
+EXPORT_SYMBOL(rpmb_is_enable);
 
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 /* ChaoYing.Chen@BSP.Kernel.Boot, 2018/11/06, Add for add cmdline for exp_opera info*/

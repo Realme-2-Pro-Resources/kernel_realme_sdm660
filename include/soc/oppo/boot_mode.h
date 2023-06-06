@@ -23,7 +23,9 @@ enum{
 	MSM_BOOT_MODE__CHARGE,
 	MSM_BOOT_MODE__SILENCE,
 	MSM_BOOT_MODE__SAU,
-   
+#ifdef CONFIG_PRODUCT_REALME_RMX1801
+	MSM_BOOT_MODE__SAFE = 999,
+#endif
 };
 
 extern int get_boot_mode(void);

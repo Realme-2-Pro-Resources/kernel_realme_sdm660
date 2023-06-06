@@ -11,7 +11,7 @@ static struct kobject *systeminfo_kobj;
 
 #define MAX_CMD_LENGTH 32
 
-static int ftm_mode = MSM_BOOT_MODE__NORMAL;
+static int ftm_mode  __ro_after_init = MSM_BOOT_MODE__NORMAL;
 
 int __init  board_mfg_mode_init(void)
 {	
@@ -36,6 +36,8 @@ int __init  board_mfg_mode_init(void)
             ftm_mode = MSM_BOOT_MODE__SILENCE;
         else if(strncmp(substr, "ftmsau", 6) == 0)
             ftm_mode = MSM_BOOT_MODE__SAU;
+		else if (strncmp(substr, "ftmsafe", 7) == 0)
+			ftm_mode = MSM_BOOT_MODE__SAFE;
     } 	
 
 	pr_err("board_mfg_mode_init, " "ftm_mode=%d\n", ftm_mode);
@@ -106,7 +108,7 @@ static struct attribute_group attr_group = {
 
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 /* OPPO 2013-09-03 heiwei add for add interface start reason and boot_mode begin */
-char pwron_event[MAX_CMD_LENGTH];
+char pwron_event[MAX_CMD_LENGTH + 1];
 static int __init start_reason_init(void)
 {
     int i;
@@ -125,7 +127,7 @@ static int __init start_reason_init(void)
 }
 //__setup("androidboot.startupmode=", start_reason_setup);
 
-char boot_mode[MAX_CMD_LENGTH];
+char boot_mode[MAX_CMD_LENGTH + 1]  __ro_after_init;
 
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 //Fuchun.Liao@Mobile.BSP.CHG 2016-01-14 add for charge
@@ -140,7 +142,7 @@ bool qpnp_is_power_off_charging(void)
 #endif
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 //PengNan@SW.BSP add for detect charger when reboot 2016-04-22
-char charger_reboot[MAX_CMD_LENGTH];
+char charger_reboot[MAX_CMD_LENGTH + 1];
 bool qpnp_is_charger_reboot(void)
 {
 	pr_err("%s charger_reboot:%s\n", __func__, charger_reboot);

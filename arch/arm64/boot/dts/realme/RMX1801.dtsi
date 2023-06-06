@@ -168,12 +168,6 @@
     };
 };
 
-/* diff with sdm660-coresight.dtsi */
-&cti2 {
-    /delete-property/ pinctrl-names;
-    /delete-property/ pinctrl-0;
-};
-
 /* diff with sdm660-common.dtsi */
 &qusb_phy0 {
     qcom,qusb-phy-init-seq = <0x78 0x80

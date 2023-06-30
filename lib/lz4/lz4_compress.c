@@ -395,7 +395,7 @@ _last_literals:
 			*op++ = (BYTE)(lastRun << ML_BITS);
 		}
 
-		LZ4_memcpy(op, anchor, lastRun);
+		memcpy(op, anchor, lastRun);
 
 		op += lastRun;
 	}

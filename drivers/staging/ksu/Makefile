@@ -20,7 +20,7 @@ ifndef EXPECTED_HASH
 EXPECTED_HASH := 0xb0b91415
 endif
 
-ccflags-y += -DKSU_GIT_VERSION=815
+ccflags-y += -DKSU_VERSION=11093 # 10000 + $(TOTAL_GIT_COMMIT) +  200
 ccflags-y += -DEXPECTED_SIZE=$(EXPECTED_SIZE)
 ccflags-y += -DEXPECTED_HASH=$(EXPECTED_HASH)
 ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-int-conversion -Wno-gcc-compat

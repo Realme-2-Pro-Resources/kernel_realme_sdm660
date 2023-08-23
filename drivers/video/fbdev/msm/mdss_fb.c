@@ -2863,7 +2863,7 @@ static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 //Shengjun.Gou@PSW.MM.Display.LCD.Stability, 2017/01/19,
 //add for panel debug
-    pr_info("start mdss blank %d\n", blank_mode);
+    pr_debug("start mdss blank %d\n", blank_mode);
 #endif
 
 
@@ -2988,7 +2988,7 @@ static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 //Shengjun.Gou@PSW.MM.Display.LCD.Stability, 2017/01/19,
 //add for panel debug
-	pr_info("end mdss blank %d\n", blank_mode);
+	pr_debug("end mdss blank %d\n", blank_mode);
 #endif
 
 

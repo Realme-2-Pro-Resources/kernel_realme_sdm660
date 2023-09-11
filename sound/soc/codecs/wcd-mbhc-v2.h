@@ -454,6 +454,12 @@ struct wcd_mbhc {
 
 	/* Work to correct accessory type */
 	struct work_struct correct_plug_swch;
+	#ifdef CONFIG_PRODUCT_REALME
+	/*xiang.fei@PSW.MM.AudioDriver.HeadsetDet, 2017/04/15,
+	 *Add for headset detect.
+	 */
+	struct delayed_work hp_detect_work;
+	#endif /* CONFIG_PRODUCT_REALME */
 	struct notifier_block nblock;
 
 	struct wcd_mbhc_register *wcd_mbhc_regs;

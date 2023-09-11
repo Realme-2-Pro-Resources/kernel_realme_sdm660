@@ -838,7 +838,17 @@ ring_doorbell:
 		cmdq_dumpregs(cq_host);
 		BUG_ON(1);
 	}
+
+	#ifndef CONFIG_PRODUCT_REALME
+	//rendong.shi@BSP.Storage.emmc,2017/4/29,merge debug patch1918004 for emmc issue
 	MMC_TRACE(mmc, "%s: tag: %d\n", __func__, tag);
+	#else
+	MMC_TRACE(mmc, "%s: tag: %d mrq_start_time: %llu Addr: %p\n",
+			__func__, tag, mrq->mrq_start, (void *)mrq);
+	if ((mrq->cmd && mrq->cmd->error) || (mrq->data && mrq->data->error))
+			MMC_TRACE(mmc, "%s: tag: %d error\n", __func__, tag);
+	#endif
+	
 	cmdq_writel(cq_host, 1 << tag, CQTDBR);
 	/* Commit the doorbell write immediately */
 	wmb();

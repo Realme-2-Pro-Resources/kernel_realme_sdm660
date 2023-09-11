@@ -9304,8 +9304,11 @@ static void update_cpu_capacity(struct sched_domain *sd, int cpu)
 		mcc->cpu = cpu;
 #ifdef CONFIG_SCHED_DEBUG
 		raw_spin_unlock_irqrestore(&mcc->lock, flags);
+#ifndef CONFIG_PRODUCT_REALME
+/* Yichun.Chen  PSW.BSP.CHG  2018-10-06  reduce kernel log */
 		printk_deferred(KERN_INFO "CPU%d: update max cpu_capacity %lu\n",
 				cpu, capacity);
+#endif
 		goto skip_unlock;
 #endif
 	}

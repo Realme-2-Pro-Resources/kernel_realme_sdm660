@@ -925,8 +925,14 @@ void msm_isp_increment_frame_id(struct vfe_device *vfe_dev,
 			 */
 			if (ms_res->src_sof_mask & (1 <<
 				src_info->dual_hw_ms_info.index)) {
+				#ifndef CONFIG_PRODUCT_REALME
+				/* Modify by LiuBin at 20170504 for [lower the log level] */
 				pr_err_ratelimited("Frame out of sync on vfe %d\n",
 					vfe_dev->pdev->id);
+				#else
+				ISP_DBG("Frame out of sync on vfe %d\n",
+					vfe_dev->pdev->id);
+				#endif
 				/* Notify to do reconfig at SW sync drop*/
 				vfe_dev->isp_page->dual_cam_drop_detected = 1;
 				/*

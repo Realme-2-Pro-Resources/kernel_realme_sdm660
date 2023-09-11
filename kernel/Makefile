@@ -13,6 +13,11 @@ obj-y     = fork.o exec_domain.o panic.o \
 
 obj-$(CONFIG_MULTIUSER) += groups.o
 
+#ifdef CONFIG_PRODUCT_REALME
+#yanwu@TECH.Storage.FS, 2019/08/27, add code to flush device cache in panic
+obj-$(CONFIG_PRODUCT_REALME) += panic_flush.o
+#endif
+
 ifdef CONFIG_FUNCTION_TRACER
 # Do not trace debug files and internal ftrace files
 CFLAGS_REMOVE_cgroup-debug.o = $(CC_FLAGS_FTRACE)

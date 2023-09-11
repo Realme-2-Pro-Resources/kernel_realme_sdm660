@@ -18,6 +18,10 @@
 #include "mdss_dsi.h"
 #include "mdss_mdp.h"
 #include "mdss_debug.h"
+#ifdef CONFIG_PRODUCT_REALME
+//add for lcd esd recovery power off when tp black gesture open
+extern uint lcd_esd_status;
+#endif /*CONFIG_PRODUCT_REALME*/
 
 /*
  * mdss_check_te_status() - Check the status of panel for TE based ESD.

@@ -131,6 +131,17 @@ static unsigned long zero_ul;
 static unsigned long one_ul = 1;
 static unsigned long long_max = LONG_MAX;
 static int one_hundred = 100;
+
+#ifdef CONFIG_PRODUCT_REALME
+/*yanwu@TECH.Storage.FS, 2019-07-15, add control f2fs fsync nobarrier*/
+unsigned int sysctl_f2fs_fsync_nobarrier = 0;
+/*jason.tang@TECH.BSP.Kernel.Storage, 2019-05-20, add control ext4 fsync*/
+unsigned int sysctl_ext4_fsync_enable = 1;
+unsigned int ext4_fsync_enable_status = 0;
+/*jason.tang@TECH.BSP.Kernel.Storage, 2019-05-20, add to count flush*/
+unsigned long sysctl_blkdev_issue_flush_count = 0;
+#endif /*CONFIG_PRODUCT_REALME*/
+
 #ifdef CONFIG_PRINTK
 static int ten_thousand = 10000;
 #endif
@@ -520,6 +531,25 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = proc_dointvec,
 	},
 #endif	/* CONFIG_SCHED_HMP */
+#ifdef CONFIG_PRODUCT_REALME
+/*jason.tang@TECH.BSP.Kernel.Storage, 2019-05-20, add control ext4 fsync*/
+{
+		.procname	= "ext4_fsync_enable",
+		.data		= &sysctl_ext4_fsync_enable,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0666,
+		.proc_handler	= proc_dointvec,
+},
+/*jason.tang@TECH.BSP.Kernel.Storage, 2019-05-20, add to count flush*/
+{
+		.procname	= "blkdev_issue_flush_count",
+		.data		= &sysctl_blkdev_issue_flush_count,
+		.maxlen		= sizeof(unsigned long),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec,
+},
+#endif
+
 #ifdef CONFIG_SCHED_DEBUG
 	{
 		.procname	= "sched_min_granularity_ns",

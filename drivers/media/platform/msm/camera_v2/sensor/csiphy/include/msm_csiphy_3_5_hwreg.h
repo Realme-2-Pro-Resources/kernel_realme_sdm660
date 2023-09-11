@@ -14,6 +14,9 @@
 #define MSM_CSIPHY_3_5_HWREG_H
 
 #define ULPM_WAKE_UP_TIMER_MODE                   2
+#ifdef CONFIG_PRODUCT_REALME
+#define GLITCH_ELIMINATION_NUM                    0x12 /* bit [6:4] */
+#endif
 
 #include <sensor/csiphy/msm_csiphy.h>
 
@@ -46,7 +49,11 @@ struct csiphy_reg_3ph_parms_t csiphy_v3_5_3ph = {
 	{0x138, 0x0},
 	{0x13C, 0x10},
 	{0x140, 0x1},
+#ifdef CONFIG_PRODUCT_REALME
+	{0x144, GLITCH_ELIMINATION_NUM},
+#else
 	{0x144, 0x32},
+#endif
 	{0x148, 0xFE},
 	{0x14C, 0x1},
 	{0x154, 0x0},

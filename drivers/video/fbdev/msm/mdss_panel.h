@@ -308,6 +308,12 @@ enum mdss_intf_events {
 	MDSS_EVENT_DSI_TIMING_DB_CTRL,
 	MDSS_EVENT_AVR_MODE,
 	MDSS_EVENT_REGISTER_CLAMP_HANDLER,
+
+#ifdef CONFIG_PRODUCT_REALME
+//add for dynamic mipi dsi clk
+	MDSS_EVENT_PANEL_UPDATE_DSI_TIMING,
+#endif /*CONFIG_PRODUCT_REALME*/
+
 	MDSS_EVENT_DSI_DYNAMIC_BITCLK,
 	MDSS_EVENT_MAX,
 };
@@ -806,6 +812,13 @@ struct mdss_panel_info {
 	int pwm_lpg_chan;
 	int pwm_period;
 	bool dynamic_fps;
+
+#ifdef CONFIG_PRODUCT_REALME
+//add for dynamic mipi dsi clk
+	bool dynamic_dsitiming;
+	u32  cached_clk_rate;
+#endif /*CONFIG_PRODUCT_REALME*/
+
 	bool dynamic_bitclk;
 	u32 *supp_bitclks;
 	u32 supp_bitclk_len;

@@ -65,6 +65,13 @@ void __weak panic_smp_self_stop(void)
 		cpu_relax();
 }
 
+#ifdef CONFIG_PRODUCT_REALME
+/*yanwu@TECH.Storage.FS, 2019-08-27, flush device cache before goto dump mode*/
+extern int panic_flush_device_cache(int timeout);
+/*yanghao@BSP.Kernel.Stability, 2019-9-5*/
+extern int get_download_mode(void);
+#endif  /*CONFIG_PRODUCT_REALME*/
+
 /**
  *	panic - halt the system
  *	@fmt: The text string to print
@@ -110,6 +117,12 @@ void panic(const char *fmt, ...)
 	vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
 	dump_stack_minidump(0);
+#ifdef CONFIG_PRODUCT_REALME
+	/*yanwu@TECH.Storage.FS, 2019-08-27, flush device cache before goto dump mode*/
+	/*yanghao@BSP.Kernel.Stability, 2019-9-5*/
+	if(!get_download_mode())
+	    panic_flush_device_cache(2000);
+#endif
 	pr_emerg("Kernel panic - not syncing: %s\n", buf);
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 	/*

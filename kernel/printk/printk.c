@@ -49,6 +49,12 @@
 
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_PRODUCT_REALME
+//nanwei.deng@bsp.drv 20160204 add for disable uart print
+//this modify can reduce poweron time add ftm mode
+#include <soc/oppo/boot_mode.h>
+#endif
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/printk.h>
 
@@ -59,6 +65,15 @@
 extern void printascii(char *);
 #endif
 
+#ifdef CONFIG_PRODUCT_REALME
+//Jingchun.Wang@bsp.drv, 2017/04/19,
+//add for get disable uart value from cmdline
+bool printk_disable_uart = false;
+bool oem_get_uartlog_status(void)
+{
+	return printk_disable_uart;
+}
+#endif /*CONFIG_PRODUCT_REALME*/
 int console_printk[4] = {
 	CONSOLE_LOGLEVEL_DEFAULT,	/* console_loglevel */
 	MESSAGE_LOGLEVEL_DEFAULT,	/* default_message_loglevel */
@@ -1045,6 +1060,11 @@ static inline void boot_delay_msec(int level)
 
 static bool printk_time = IS_ENABLED(CONFIG_PRINTK_TIME);
 module_param_named(time, printk_time, bool, S_IRUGO | S_IWUSR);
+#ifdef CONFIG_PRODUCT_REALME
+//Jingchun.Wang@bsp.drv, 2017/04/19,
+//add for get disable uart value from cmdline
+module_param_named(disable_uart, printk_disable_uart, bool, S_IRUGO | S_IWUSR);
+#endif /*CONFIG_PRODUCT_REALME*/
 
 static size_t print_time(u64 ts, char *buf)
 {
@@ -1453,6 +1473,16 @@ static void call_console_drivers(int level,
 		return;
 
 	for_each_console(con) {
+		#ifdef CONFIG_PRODUCT_REALME
+		//yixue.ge@bsp.drv 20160204 add for disable uart print
+		//this modify can reduce poweron time add ftm mode
+		if(get_boot_mode() == MSM_BOOT_MODE__FACTORY)
+		 	printk_disable_uart = true;
+
+		if (printk_disable_uart && (con->flags & CON_CONSDEV))
+			continue;
+
+		#endif
 		if (exclusive_console && con != exclusive_console)
 			continue;
 		if (!(con->flags & CON_ENABLED))

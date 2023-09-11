@@ -58,6 +58,17 @@
 
 #include "mdss_livedisplay.h"
 
+#ifdef CONFIG_PRODUCT_REALME
+/* add for get panel serial number */
+#include <soc/oppo/oppo_project.h>
+#include <soc/oppo/boot_mode.h>
+#include "mdss_dsi.h"
+#include <linux/completion.h>
+static int boot_mode = 0;
+/* add for panel status */
+int lcd_closebl_flag = 0;
+#endif /*CONFIG_PRODUCT_REALME*/
+
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
 #define MDSS_FB_NUM 3
 #else
@@ -866,6 +877,270 @@ static ssize_t mdss_fb_get_dfps_mode(struct device *dev,
 	return ret;
 }
 
+#ifdef CONFIG_PRODUCT_REALME
+//add for HBM
+int hbm_delay = 34000;
+extern int hbm_mode;
+extern ssize_t oppo_dynamic_fps_contrl(struct mdss_panel_data *pdata,
+	struct fb_info *fbi);
+bool oppo_dynamic_fps_disable_switch = false;
+/* add for dynamic fps switch*/
+static ssize_t dynamic_fps_switch_set(struct device *dev,
+							   struct device_attribute *attr,
+							   const char *buf, size_t count)
+{
+	uint8_t dynamic_fps_switch = 0x0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+
+	if (is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL))
+	{
+		if (kstrtou8(buf, 0, &dynamic_fps_switch)) {
+			pr_err("kstrtouint buf error!\n");
+			return count;
+		}
+		if (dynamic_fps_switch == 0x1)
+		{
+			oppo_dynamic_fps_disable_switch = false;
+
+		} else {
+			oppo_dynamic_fps_disable_switch = true;
+			oppo_dynamic_fps_contrl(pdata, fbi);
+		}
+
+		pr_info("%s set dynamic_fps to %x", __func__, dynamic_fps_switch);
+	}
+
+	return count;
+}
+static ssize_t dynamic_fps_switch_get(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	int ret = 0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+
+	if (oppo_dynamic_fps_disable_switch)
+	{
+		ret = 0;
+	} else {
+		ret = 1;
+	}
+
+	pr_info("%s Current dynamic_fps is %d", __func__, pdata->panel_info.mipi.frame_rate);
+
+	return sprintf(buf, "%d\n", ret);
+}
+
+//add for LBR
+extern int set_lbr_mode(int lbr_level);
+extern int get_lbr_mode(void);
+
+static ssize_t mdss_get_lbr_mode(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	if(!(is_project(OPPO_16051)||is_project(OPPO_16118)))
+		return 0;
+
+	printk(KERN_INFO "get lbr level = %d\n",get_lbr_mode());
+
+	return sprintf(buf, "%d\n", get_lbr_mode());
+}
+
+static ssize_t mdss_set_lbr_mode(struct device *dev,
+		struct device_attribute *attr,
+		const char *buf, size_t count)
+{
+	int lbr_level = 0;
+	if(!(is_project(OPPO_16051)||is_project(OPPO_16118)))
+		return count;
+
+	// add for remove LBR function.
+	return count;
+
+	sscanf(buf, "%du", &lbr_level);
+	printk(KERN_INFO "%s LBR level = %d\n", __func__, lbr_level);
+
+	set_lbr_mode(lbr_level);
+	return count;
+}
+/* modify for high brightness mode */
+extern int set_outdoor_brightness(unsigned int brightness,unsigned long outdoor_mode);
+extern unsigned int current_brightness;
+unsigned long outdoor_mode = 0;
+
+static ssize_t outdoorbl_show(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	printk("%s outdoor_mode=%ld\n", __func__, outdoor_mode);
+	return sprintf(buf, "%ld\n", outdoor_mode);
+}
+
+static ssize_t outdoorbl_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t num)
+{
+	int ret;
+	unsigned long mode;
+
+	ret = kstrtoul(buf, 10, &mode);
+	if(mode != outdoor_mode && mode < 3){
+		outdoor_mode = mode;
+		printk("%s current_brightness = %d outdoor_mode=%ld\n", __func__,current_brightness,outdoor_mode);
+		set_outdoor_brightness(current_brightness,outdoor_mode);
+	}
+	return num;
+}
+
+//add for lcd esd test
+extern void set_esd_mode(int level);
+static ssize_t mdss_get_esd(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	set_esd_mode(0);
+	return sprintf(buf, "%d\n", 0);
+}
+
+//add for adb mipi read/write lcd reg
+extern void send_user_write_reg(char *par, u32 cnt);
+extern void dump_lcd_reg(size_t off,u32 data,char* dump_data);
+
+#define REG_CNT_R 16 //Read reg counts
+
+//add for lcd off event for ftm
+static ssize_t mdss_mdp_lcdoff_event(struct device *dev,
+        struct device_attribute *attr, char *buf)
+{
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+
+	pr_err("%s mfd=0x%p\n", __func__, mfd);
+	if (!mfd)
+		return -ENODEV;
+
+	//return sprintf(buf,"mdss_fb_suspend_sub is called\n");
+
+	//add for lcd to dump for ftm
+	return mdss_fb_send_panel_event(mfd, MDSS_EVENT_DISABLE_PANEL, NULL);
+}
+
+//add for lcd cabc
+extern int set_cabc(int level);
+extern int cabc_mode;
+
+static ssize_t mdss_get_cabc(struct device *dev,
+        struct device_attribute *attr, char *buf)
+{
+	if(!(is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL)))
+	{
+		return 0;
+	}
+	printk(KERN_INFO "get cabc mode = %d\n",cabc_mode);
+
+	return sprintf(buf, "%d\n", cabc_mode);
+}
+
+static ssize_t mdss_set_cabc(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *buf, size_t count)
+{
+	int level = 0;
+
+	if(!(is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL)))
+	{
+		return count;
+	}
+
+	sscanf(buf, "%du", &level);
+	set_cabc(level);
+	return count;
+}
+static ssize_t mdss_get_closebl_flag(struct device *dev,
+                                struct device_attribute *attr, char *buf)
+{
+	printk(KERN_INFO "get closebl flag = %d\n",lcd_closebl_flag);
+	return sprintf(buf, "%d\n", lcd_closebl_flag);
+}
+
+static ssize_t mdss_set_closebl_flag(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *buf, size_t count)
+{
+	int closebl = 0;
+	sscanf(buf, "%du", &closebl);
+	pr_err("lcd_closebl_flag = %d\n",closebl);
+	if(1 != closebl)
+		lcd_closebl_flag = 0;
+	pr_err("mdss_set_closebl_flag = %d\n",lcd_closebl_flag);
+	return count;
+}
+
+/* add for lcm id read */
+static uint8_t lcm_id_addr = 0x0;
+extern void lcm_id_read(char reg_addr, char* buf, int lenth);
+
+static ssize_t lcm_set_id_addr(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *buf, size_t count)
+{
+	if (kstrtou8(buf, 0, &lcm_id_addr))
+	{
+		pr_err("%s kstrtouu8 buf error!\n", __func__);
+		return count;
+	}
+
+	pr_info("%s set lcm id address:0x%2x.\n", __func__, lcm_id_addr);
+
+	return count;
+}
+
+static ssize_t lcm_get_id_info(struct device *dev,
+        struct device_attribute *attr, char *buf)
+{
+	int ret = 0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+	int lcm_id_read_len = 2;
+	uint8_t lcm_id_info[16] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+							   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+
+	if (!pdata)
+	{
+		pr_err("no panel connected!\n");
+		return -1;
+	}
+
+	if (mdss_panel_is_power_off(mfd->panel_power_state))
+	{
+		pr_err("panel is off, read panel reg forbidden!\n");
+		return -1;
+	}
+
+	if (0x0 != lcm_id_addr)
+	{
+		lcm_id_read(lcm_id_addr, lcm_id_info, lcm_id_read_len);
+		ret = scnprintf(buf, PAGE_SIZE, "LCM ID[%x]: 0x%x 0x%x\n", lcm_id_addr, lcm_id_info[0], lcm_id_info[1]);
+		lcm_id_addr = 0x0;
+	} else {
+		ret = scnprintf(buf, PAGE_SIZE, "LCM ID[00]: 0x00 0x00\n");
+	}
+
+	return ret;
+}
+
+static DEVICE_ATTR(esd, S_IRUGO, mdss_get_esd, NULL);
+//add for lcd off event for ftm
+static DEVICE_ATTR(lcdoff, S_IRUGO, mdss_mdp_lcdoff_event, NULL);
+//add for lcd cabc
+static DEVICE_ATTR(cabc, S_IRUGO|S_IWUSR, mdss_get_cabc, mdss_set_cabc);
+static DEVICE_ATTR(closebl, 0664, mdss_get_closebl_flag, mdss_set_closebl_flag);
+#endif /*CONFIG_PRODUCT_REALME*/
+
 static ssize_t mdss_fb_change_persist_mode(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t len)
 {
@@ -959,6 +1234,17 @@ static DEVICE_ATTR(msm_fb_dfps_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_dfps_mode, mdss_fb_change_dfps_mode);
 static DEVICE_ATTR(measured_fps, S_IRUGO | S_IWUSR | S_IWGRP,
 	mdss_fb_get_fps_info, NULL);
+#ifdef CONFIG_PRODUCT_REALME
+//add for 16051 read LCM window info
+static DEVICE_ATTR(lcm_id_info, S_IRUGO | S_IWUSR, lcm_get_id_info, lcm_set_id_addr);
+//add for LBR
+static DEVICE_ATTR(lbr, S_IRUGO|S_IWUSR, mdss_get_lbr_mode, mdss_set_lbr_mode);
+/* modify for high brightness mode */
+static DEVICE_ATTR(outdoorbl, S_IRUGO|S_IWUSR, outdoorbl_show, outdoorbl_store);
+/* add for dynamic fps switch */
+static DEVICE_ATTR(dynamic_fps_switch, S_IRUGO|S_IWUSR, dynamic_fps_switch_get, dynamic_fps_switch_set);
+#endif /*CONFIG_PRODUCT_REALME*/
+
 static DEVICE_ATTR(msm_fb_persist_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_persist_mode, mdss_fb_change_persist_mode);
 static DEVICE_ATTR(idle_power_collapse, S_IRUGO, mdss_fb_idle_pc_notify, NULL);
@@ -977,6 +1263,23 @@ static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_msm_fb_dfps_mode.attr,
 	&dev_attr_measured_fps.attr,
 	&dev_attr_msm_fb_persist_mode.attr,
+#ifdef CONFIG_PRODUCT_REALME
+	&dev_attr_esd.attr,
+//add for lcd off event for ftm
+	&dev_attr_lcdoff.attr,
+//add for lcd cabc
+	&dev_attr_cabc.attr,
+	&dev_attr_closebl.attr,
+//add for read LCM window info
+	&dev_attr_lcm_id_info.attr,
+//add for LBR
+	&dev_attr_lbr.attr,
+/* add for dynamic fps switch */
+	&dev_attr_dynamic_fps_switch.attr,
+//modify for high brightness mode
+	&dev_attr_outdoorbl.attr,
+#endif /*CONFIG_PRODUCT_REALME*/
+
 	&dev_attr_idle_power_collapse.attr,
 	NULL,
 };
@@ -1313,11 +1616,27 @@ static int mdss_fb_probe(struct platform_device *pdev)
 	}
 
 	mfd->ext_ad_ctrl = -1;
+#ifndef CONFIG_PRODUCT_REALME
+//modify for lcd happen esd set backlight 127 before set system backlight
 	if (mfd->panel_info && mfd->panel_info->brightness_max > 0)
 		MDSS_BRIGHT_TO_BL(mfd->bl_level, backlight_led.brightness,
 		mfd->panel_info->bl_max, mfd->panel_info->brightness_max);
 	else
 		mfd->bl_level = 0;
+#else /*CONFIG_PRODUCT_REALME*/
+	pr_err("bl_max:%d brightness_max:%d \n", mfd->panel_info->bl_max, mfd->panel_info->brightness_max);
+	if (mfd->panel_info && mfd->panel_info->brightness_max > 0){
+		MDSS_BRIGHT_TO_BL(mfd->bl_level, backlight_led.brightness,
+		mfd->panel_info->bl_max, mfd->panel_info->brightness_max);
+		if(mfd->panel_info->bl_max > 1023){
+			mfd->bl_level = 1600;   /*for 2048 level backlight set same to lk 1600*/
+		}else{
+			mfd->bl_level = 200;	/*for 200 level backlight set same to lk 200*/
+		}
+	}
+	else
+		mfd->bl_level = 0;
+#endif /*CONFIG_PRODUCT_REALME*/
 
 	mfd->bl_scale = 1024;
 	mfd->ad_bl_level = 0;
@@ -1428,6 +1747,14 @@ static int mdss_fb_probe(struct platform_device *pdev)
 			pr_err("failed to register input handler\n");
 
 	INIT_DELAYED_WORK(&mfd->idle_notify_work, __mdss_fb_idle_notify_work);
+
+	#ifdef CONFIG_PRODUCT_REALME
+	//add for silence and sau mode close bl flag
+	if((MSM_BOOT_MODE__SILENCE == get_boot_mode()) || (MSM_BOOT_MODE__SAU == get_boot_mode())){
+		pr_debug("lcd_closebl_flag = 1\n");
+		lcd_closebl_flag = 1;
+	}
+	#endif /* CONFIG_PRODUCT_REALME */
 
 	return rc;
 }
@@ -1748,6 +2075,8 @@ void mdss_fb_set_backlight(struct msm_fb_data_type *mfd, u32 bkl_lvl)
 	bool ad_bl_notify_needed = false;
 	bool bl_notify_needed = false;
 
+#ifndef CONFIG_PRODUCT_REALME
+//modify for Lcd ftm mode backlight
 	if ((((mdss_fb_is_power_off(mfd) && mfd->dcm_state != DCM_ENTER)
 		|| !mfd->allow_bl_update) && !IS_CALIB_MODE_BL(mfd)) ||
 		mfd->panel_info->cont_splash_enabled) {
@@ -1758,6 +2087,23 @@ void mdss_fb_set_backlight(struct msm_fb_data_type *mfd, u32 bkl_lvl)
 	} else {
 		mfd->unset_bl_level = U32_MAX;
 	}
+#else /*CONFIG_PRODUCT_REALME*/
+	boot_mode =get_boot_mode();
+	if(boot_mode == MSM_BOOT_MODE__FACTORY){
+			mfd->unset_bl_level = 0;
+	}else{
+		if ((((mdss_fb_is_power_off(mfd) && mfd->dcm_state != DCM_ENTER)
+			|| !mfd->allow_bl_update) && !IS_CALIB_MODE_BL(mfd)) ||
+			mfd->panel_info->cont_splash_enabled) {
+			mfd->unset_bl_level = bkl_lvl;
+			return;
+		} else if (mdss_fb_is_power_on(mfd) && mfd->panel_info->panel_dead) {
+			mfd->unset_bl_level = mfd->bl_level;
+		} else {
+			mfd->unset_bl_level = U32_MAX;
+		}
+	}
+#endif /*CONFIG_PRODUCT_REALME*/
 
 	pdata = dev_get_platdata(&mfd->pdev->dev);
 
@@ -1999,7 +2345,11 @@ static int mdss_fb_blank_unblank(struct msm_fb_data_type *mfd)
 	}
 
 	/* Reset the backlight only if the panel was off */
+	#ifndef CONFIG_PRODUCT_REALME
 	if (mdss_panel_is_power_off(cur_power_state)) {
+	#else
+	if (mdss_panel_is_power_off(cur_power_state) || mdss_panel_is_power_on_lp(cur_power_state) ) {
+	#endif
 		mutex_lock(&mfd->bl_lock);
 		if (!mfd->allow_bl_update) {
 			mfd->allow_bl_update = true;
@@ -5366,3 +5716,66 @@ void mdss_fb_idle_pc(struct msm_fb_data_type *mfd)
 		sysfs_notify(&mfd->fbi->dev->kobj, NULL, "idle_power_collapse");
 	}
 }
+
+/*
+ * Generate closebl node of oppo_display
+ */
+static ssize_t oppo_display_get_closebl_flag(struct device *dev,
+                                struct device_attribute *attr, char *buf)
+{
+	printk(KERN_INFO "oppo_display_get_closebl_flag = %d\n",lcd_closebl_flag);
+	return sprintf(buf, "%d\n", lcd_closebl_flag);
+}
+
+static ssize_t oppo_display_set_closebl_flag(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *buf, size_t count)
+{
+	int closebl = 0;
+	sscanf(buf, "%du", &closebl);
+	pr_err("lcd_closebl_flag = %d\n",closebl);
+	if(1 != closebl)
+		lcd_closebl_flag = 0;
+	pr_err("oppo_display_set_closebl_flag = %d\n",lcd_closebl_flag);
+	return count;
+}
+struct kobject *oppo_display_kobj;
+static DEVICE_ATTR(sau_closebl_node, S_IRUGO|S_IWUSR, oppo_display_get_closebl_flag, oppo_display_set_closebl_flag);
+/*
+ * Create a group of attributes so that we can create and destroy them all
+ * at once.
+ */
+static struct attribute *oppo_display_attrs[] = {
+	&dev_attr_sau_closebl_node.attr,
+	NULL,	/* need to NULL terminate the list of attributes */
+};
+
+static struct attribute_group oppo_display_attr_group = {
+	.attrs = oppo_display_attrs,
+};
+
+static int __init oppo_display_private_api_init(void)
+{
+	int retval;
+
+	oppo_display_kobj = kobject_create_and_add("oppo_display", kernel_kobj);
+	if (!oppo_display_kobj)
+		return -ENOMEM;
+
+	/* Create the files associated with this kobject */
+	retval = sysfs_create_group(oppo_display_kobj, &oppo_display_attr_group);
+	if (retval)
+		kobject_put(oppo_display_kobj);
+
+	return retval;
+}
+
+static void __exit oppo_display_private_api_exit(void)
+{
+	kobject_put(oppo_display_kobj);
+}
+
+module_init(oppo_display_private_api_init);
+module_exit(oppo_display_private_api_exit);
+MODULE_LICENSE("GPL v2");
+MODULE_AUTHOR("xxx <xxx@realme.com>");

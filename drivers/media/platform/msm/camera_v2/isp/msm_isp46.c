@@ -544,7 +544,11 @@ static long msm_vfe46_reset_hardware(struct vfe_device *vfe_dev,
 
 	if (blocking_call) {
 		rc = wait_for_completion_timeout(
+#ifndef CONFIG_PRODUCT_REALME
 			&vfe_dev->reset_complete, msecs_to_jiffies(50));
+#else
+			&vfe_dev->reset_complete, msecs_to_jiffies(500));
+#endif
 		if (rc <= 0) {
 			pr_err("%s:%d failed: reset timeout\n", __func__,
 				__LINE__);

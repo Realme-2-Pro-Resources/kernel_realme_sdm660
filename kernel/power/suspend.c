@@ -34,6 +34,12 @@
 
 #include "power.h"
 
+#ifdef CONFIG_PRODUCT_REALME
+//wangkun@psw.bsp.tp 2018/10/17 modified for stop system enter sleep before low irq handled
+#include <soc/oppo/oppo_project.h>
+__attribute__((weak)) int check_touchirq_triggered(void) {return 0;}
+#endif /* CONFIG_PRODUCT_REALME */
+
 #include <linux/gpio.h>
 extern int slst_gpio_base_id;
 #define PROC_AWAKE_ID 12 /* 12th bit */
@@ -378,6 +384,14 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 	arch_suspend_disable_irqs();
 	BUG_ON(!irqs_disabled());
 
+	#ifdef CONFIG_PRODUCT_REALME
+	//wangkun@psw.bsp.tp 2018/10/17 modified for stop system enter sleep before low irq handled
+	if (check_touchirq_triggered()) {
+		error = -EBUSY;
+		goto Enable_irqs;
+	}
+	#endif /* CONFIG_PRODUCT_REALME */
+
 	error = syscore_suspend();
 	if (!error) {
 		*wakeup = pm_wakeup_pending();
@@ -396,6 +410,10 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 		syscore_resume();
 	}
 
+#ifdef CONFIG_PRODUCT_REALME
+//wangkun@psw.bsp.tp 2018/08/30 modified for stop system enter sleep before low irq handled
+ Enable_irqs:
+#endif /* CONFIG_PRODUCT_REALME */
 	arch_suspend_enable_irqs();
 	BUG_ON(irqs_disabled());
 
@@ -479,6 +497,67 @@ static void suspend_finish(void)
 	pm_restore_console();
 }
 
+#ifdef CONFIG_PRODUCT_REALME //yixue.ge@bsp.drv add for move sync to a workqueue to speed suspend
+/**
+ * Sync the filesystem in seperate workqueue.
+ * Then check it finishing or not periodically and
+ * abort if any wakeup source comes in. That can reduce
+ * the wakeup latency
+ *
+ */
+static bool sys_sync_completed = false;
+static void sys_sync_work_func(struct work_struct *work);
+static DECLARE_WORK(sys_sync_work, sys_sync_work_func);
+static DECLARE_WAIT_QUEUE_HEAD(sys_sync_wait);
+static void sys_sync_work_func(struct work_struct *work)
+{
+	trace_suspend_resume(TPS("sync_filesystems"), 0, true);
+	printk(KERN_INFO "PM: Syncing filesystems ... ");
+	sys_sync();
+	printk("done.\n");
+	trace_suspend_resume(TPS("sync_filesystems"), 0, false);
+	sys_sync_completed = true;
+	wake_up(&sys_sync_wait);
+}
+
+static int sys_sync_queue(void)
+{
+	int work_status = work_busy(&sys_sync_work);
+
+	/*maybe some irq coming here before pending check*/
+	pm_wakeup_clear();
+
+	/*Check if the previous work still running.*/
+	if (!(work_status & WORK_BUSY_PENDING)) {
+		if (work_status & WORK_BUSY_RUNNING) {
+			while (wait_event_timeout(sys_sync_wait, sys_sync_completed,
+						msecs_to_jiffies(100)) == 0) {
+				if (pm_wakeup_pending()) {
+					pr_info("PM: Pre-Syncing abort\n");
+					goto abort;
+				}
+			}
+			pr_info("PM: Pre-Syncing done\n");
+		}
+		sys_sync_completed = false;
+		schedule_work(&sys_sync_work);
+	}
+
+	while (wait_event_timeout(sys_sync_wait, sys_sync_completed,
+					msecs_to_jiffies(100)) == 0) {
+		if (pm_wakeup_pending()) {
+			pr_info("PM: Syncing abort\n");
+			goto abort;
+		}
+	}
+
+	pr_info("PM: Syncing done\n");
+	return 0;
+abort:
+	return -EAGAIN;
+}
+#endif
+
 /**
  * enter_state - Do common work needed to enter system sleep state.
  * @state: System sleep state to enter.
@@ -509,12 +588,20 @@ static int enter_state(suspend_state_t state)
 	if (state == PM_SUSPEND_FREEZE)
 		freeze_begin();
 
+#ifndef CONFIG_PRODUCT_REALME //yixue.ge@bsp.drv add for move sync to a workqueue to speed suspend
 #ifndef CONFIG_SUSPEND_SKIP_SYNC
 	trace_suspend_resume(TPS("sync_filesystems"), 0, true);
 	printk(KERN_INFO "PM: Syncing filesystems ... ");
 	sys_sync();
 	printk("done.\n");
 	trace_suspend_resume(TPS("sync_filesystems"), 0, false);
+#endif
+#else
+	error = sys_sync_queue();
+	if (error) {
+		pr_info("%s sys_sync_queue fail\n", __func__);
+		goto Unlock;
+	}
 #endif
 
 	pr_debug("PM: Preparing system for sleep (%s)\n", pm_states[state]);

@@ -555,10 +555,18 @@
 //#endif
 
 //#ifdef CONFIG_PRODUCT_REALME_RMX1801
-/* Yongzhi.Zhang@PSW.MM.AudioDriver.Machine, 2018/06/27, Add for tfa9890 config */
+/*xiang.fei@PSW.MM.AudioDriver.Machine, 2017/01/13, Add for ak4376&tfa9890 config*/
 &i2c_6 { /*  BLSP2 QUP2 */
 	status = "okay";
-	tfa98xx@35 {
+	ak4376@10 {
+		compatible = "akm,ak4376";
+		reg = <0x10>;
+		ak4376,reset-gpio = <&tlmm 76 0x00>;
+		audio-vdd-enable-gpio = <&tlmm 60 0x00>;
+		status = "okay";
+	};
+
+	tfa98xx@36 {
 		compatible = "nxp,tfa98xx";
 		reg = <0x36>;
 		nxp,rst-ctrl-gpio = <&tlmm 80 0x00>;

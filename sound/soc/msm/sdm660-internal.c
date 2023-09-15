@@ -1717,6 +1717,29 @@ static int msm_snd_card_late_probe(struct snd_soc_card *card)
 	return ret;
 }
 
+#ifdef CONFIG_PRODUCT_REALME_RMX1801
+/* Jianfeng.Qiu@PSW.MM.AudioDriver.HeadsetDAC 2015/06/03,
+ * Add for no sound when ap suspend in call.
+ */
+static int ak4376_audrx_init(struct snd_soc_pcm_runtime *rtd)
+{
+	struct snd_soc_codec *codec = rtd->codec;
+	struct snd_soc_dapm_context *dapm = snd_soc_codec_get_dapm(codec);//&codec->dapm;
+	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
+
+	pr_err("%s(),dev_name%s\n", __func__, dev_name(cpu_dai->dev));
+
+	snd_soc_dapm_ignore_suspend(dapm, "AK4376 HPL");
+	snd_soc_dapm_ignore_suspend(dapm, "AK4376 HPR");
+	/*xiang.fei@PSW.MM.AudioDriver.HeadsetDAC, 2017/03/19, Add for kernel 4.4*/
+	snd_soc_dapm_ignore_suspend(dapm, "Playback");
+
+	snd_soc_dapm_sync(dapm);
+
+	return 0;
+}
+#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
+
 static struct snd_soc_ops msm_tdm_be_ops = {
 	.hw_params = msm_tdm_snd_hw_params
 };
@@ -2785,6 +2808,28 @@ static struct snd_soc_dai_link msm_int_be_dai[] = {
 };
 
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
+/* Jianfeng.Qiu@PSW.MM.AudioDriver.HeadsetDAC, 2017/09/21, Add for ak43xx */
+static struct snd_soc_dai_link ak43xx_be_dai_links[] = {
+	{
+		.name = LPASS_BE_PRI_MI2S_RX,
+		.stream_name = "Primary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.0",
+		.platform_name = "msm-pcm-routing",
+		.codec_name = "ak4376.6-0010",
+		.codec_dai_name = "ak4376-AIF1",
+		.init = ak4376_audrx_init,
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.be_id = MSM_BACKEND_DAI_PRI_MI2S_RX,
+		.be_hw_params_fixup = msm_common_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+	},
+};
+#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
+
+#ifdef CONFIG_PRODUCT_REALME_RMX1801
 /* Jianfeng.Qiu@PSW.MM.AudioDriver.SmartPA, 2017/09/21, Add for tfa98xx */
 static struct snd_soc_dai_link tfa98xx_be_dai_links[] = {
 	{
@@ -3217,6 +3262,7 @@ static struct snd_soc_card *msm_int_populate_sndcard_dailinks(
 	int i;
 	const char *product_name = NULL;
 	const char *oppo_speaker_type = "oppo,speaker-pa";
+	const char *oppo_headphone_type = "oppo,headphone-pa";
 	struct snd_soc_dai_link *temp_link;
 	#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
@@ -3240,6 +3286,21 @@ static struct snd_soc_card *msm_int_populate_sndcard_dailinks(
 		/* Jianfeng.Qiu@PSW.MM.AudioDriver.Machine, 2017/01/23,
 		 * Add for custom audio.
 		 */
+		if (!of_property_read_string(dev->of_node, oppo_headphone_type,
+				&product_name)) {
+			pr_info("%s: custom headphone product %s\n", __func__, product_name);
+			for (i = 0; i < ARRAY_SIZE(msm_mi2s_be_dai_links); i++) {
+				temp_link = &msm_mi2s_be_dai_links[i];
+				if (temp_link->be_id == MSM_BACKEND_DAI_PRI_MI2S_RX) {
+					if (!strcmp(product_name, "akm")) {
+						memcpy(temp_link, &ak43xx_be_dai_links[0],
+							sizeof(ak43xx_be_dai_links[0]));
+						break;
+					}
+				}
+			}
+		}
+
 		if (!of_property_read_string(dev->of_node, oppo_speaker_type,
 				&product_name)) {
 			pr_info("%s: custom speaker product %s\n", __func__, product_name);

@@ -1022,9 +1022,10 @@
 		qcom,wsa-aux-dev-prefix = "SpkrLeft", "SpkrRight",
 					  "SpkrLeft", "SpkrRight";
 		//#ifdef CONFIG_PRODUCT_REALME_RMX1801
-		/* Yongzhi.Zhang@PSW.MM.AudioDriver.Machine, 2018/06/27,
+		/* Jianfeng.Qiu@PSW.MM.AudioDriver.Machine, 2017/01/23,
 		 * Add for custom audio.
 		 */
+		oppo,headphone-pa = "akm";
 		oppo,speaker-pa = "nxp";
 		//#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 	};

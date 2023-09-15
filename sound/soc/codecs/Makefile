@@ -428,6 +428,12 @@ obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
 obj-y += sdm660_cdc/
 obj-y += msm_sdw/
 
+#ifdef CONFIG_PRODUCT_REALME
+#Jianfeng.Qiu@PSW.MM.AudioDriver.HeadsetDAC, 2017/01/23, Add for ak43xx
+snd-soc-ak4376-objs := ak4376.o
+obj-y += snd-soc-ak4376.o
+#endif /* CONFIG_PRODUCT_REALME */
+
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 #xiang.fei@PSW.MM.AudioDriver.SmartPA, 2017/01/13, Add for nxp speaker
 obj-y += tfa98xx/

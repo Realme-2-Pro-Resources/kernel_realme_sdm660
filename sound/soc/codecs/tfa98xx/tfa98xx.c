@@ -30,9 +30,10 @@
 #include <linux/regulator/consumer.h>
 
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
-/*Ming.Liu@PSW.MM.AudioDriver.SmartPA, 2016/10/17,
-  Add for sharing software image*/
-//#include <soc/oppo/oppo_project.h>
+/*Jianfeng.Qiu@PSW.MM.AudioDriver.SmartPA, 2018/05/24,
+ *Add for sharing software image
+ */
+#include <soc/oppo/oppo_project.h>
 #endif /* CONFIG_PRODUCT_REALME_RMX1801 */
 
 #include "config.h"
@@ -55,6 +56,7 @@
 #include "tfa98xx_parameters.h"
 
 #define TFA98XX_VERSION        "2.10.1-a"
+#define CONFIG_DEBUG_FS 1
 
 #ifdef CONFIG_PRODUCT_REALME_RMX1801
 /*xiang.fei@PSW.MM.AudioDriver.FTM, 2017/02/15, Add for ringing*/

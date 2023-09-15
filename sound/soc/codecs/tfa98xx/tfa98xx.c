@@ -30,9 +30,10 @@
 #include <linux/regulator/consumer.h>
 
 #ifdef VENDOR_EDIT
-/*Ming.Liu@PSW.MM.AudioDriver.SmartPA, 2016/10/17,
-  Add for sharing software image*/
-//#include <soc/oppo/oppo_project.h>
+/*Jianfeng.Qiu@PSW.MM.AudioDriver.SmartPA, 2018/05/24,
+ *Add for sharing software image
+ */
+#include <soc/oppo/oppo_project.h>
 #endif /* VENDOR_EDIT */
 
 #include "config.h"

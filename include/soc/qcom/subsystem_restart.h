@@ -139,18 +139,7 @@ void notify_proxy_unvote(struct device *device);
 void complete_err_ready(struct subsys_device *subsys);
 extern int wait_for_shutdown_ack(struct subsys_desc *desc);
 
-#ifdef CONFIG_PRODUCT_REALME //yixue.ge add for modem restart
-extern int subsystem_restart_dev_level(struct subsys_device *dev,int restart_level);
-#endif
-
 #else
-
-#ifdef CONFIG_PRODUCT_REALME //yixue.ge add for modem restart
-static int subsystem_restart_dev_level(struct subsys_device *dev,int restart_level)
-{
-	return 0;
-}
-#endif
 
 static inline int subsys_get_restart_level(struct subsys_device *dev)
 {

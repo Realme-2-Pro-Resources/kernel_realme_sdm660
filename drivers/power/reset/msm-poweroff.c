@@ -83,20 +83,8 @@ static struct notifier_block panic_blk = {
 #define KASLR_OFFSET_PROP "qcom,msm-imem-kaslr_offset"
 #endif
 
-#ifndef CONFIG_PRODUCT_REALME //yixue.ge@bsp.drv add for minidump feature,we need enable dload_type as minidump except agingtest and daily build
 static int dload_type = SCM_DLOAD_FULLDUMP;
-#else
-	#if defined(CONFIG_OPPO_DAILY_BUILD)
-		static int dload_type = SCM_DLOAD_FULLDUMP;
-	#else
-		#if defined(CONFIG_OPPO_SPECIAL_BUILD) //if this is a aging test build ,we should enable download mode default
-		static int dload_type = SCM_DLOAD_FULLDUMP;
-		#else
-		static int dload_type = SCM_DLOAD_MINIDUMP;
-		#endif
-	#endif
-#endif
-static int download_mode = 1;
+static int download_mode = IS_ENABLED(CONFIG_QCOM_DLOAD_MODE);
 static struct kobject dload_kobj;
 static void *dload_mode_addr, *dload_type_addr;
 static bool dload_mode_enabled;
@@ -105,30 +93,6 @@ static void *emergency_dload_mode_addr;
 static void *kaslr_imem_addr;
 #endif
 static bool scm_dload_supported;
-
-#ifdef CONFIG_PRODUCT_REALME
-/*YiXue.Ge@PSW.BSP.Kernel.Driver,2017/05/15,
- * Add for can disable minidump by rom update
- */
-static int romupdate_minidumpdisable = 0;
-static int __init minidump_disable_param(char *str)
-{
-	if (*str)
-		return 0;
-	romupdate_minidumpdisable = 1;
-	return 1;
-}
-__setup("minidump.disable", minidump_disable_param);
-
-//#ifdef CONFIG_PRODUCT_REALME
-//Wanghao@BSP.Kernel.Function 2018/12/07, add for 5G modem dump issue
-int get_download_mode(void)
-{
-	return download_mode && (dload_type & SCM_DLOAD_FULLDUMP);
-}
-EXPORT_SYMBOL(get_download_mode);
-//#endif
-#endif /*CONFIG_PRODUCT_REALME*/
 
 static int dload_set(const char *val, const struct kernel_param *kp);
 /* interface for exporting attributes */
@@ -171,7 +135,6 @@ int scm_set_dload_mode(int arg1, int arg2)
 				&desc);
 }
 
-
 static void set_dload_mode(int on)
 {
 	int ret;
@@ -186,7 +149,6 @@ static void set_dload_mode(int on)
 	ret = scm_set_dload_mode(on ? dload_type : 0, 0);
 	if (ret)
 		pr_err("Failed to set secure DLOAD mode: %d\n", ret);
-
 
 	dload_mode_enabled = on;
 }
@@ -707,17 +669,6 @@ static int msm_restart_probe(struct platform_device *pdev)
 	struct device_node *np;
 	int ret = 0;
 
-	#ifdef CONFIG_PRODUCT_REALME
-	/*ziqing.guo@BSP.Kernel.Stability, 2017/05/22, Modify for disable sdi only for the secure enabled device stage 2*/
-	#define OEM_SEC_ENABLE_ANTIROLLBACK_REG 0x78019c //this address just for sdm660
-	void __iomem *oem_config_base = ioremap(OEM_SEC_ENABLE_ANTIROLLBACK_REG, 4);
-	uint32_t secure_oem_config = __raw_readl(oem_config_base);
-	iounmap(oem_config_base);
-	if (secure_oem_config) {
-		pr_debug("this is a secure stage 2 device\n");
-	}
-	#endif /* CONFIG_PRODUCT_REALME */
-
 	atomic_notifier_chain_register(&panic_notifier_list, &panic_blk);
 
 #ifdef CONFIG_QCOM_DLOAD_MODE
@@ -823,16 +774,6 @@ skip_sysfs_create:
 
 	if (scm_is_call_available(SCM_SVC_PWR, SCM_IO_DEASSERT_PS_HOLD) > 0)
 		scm_deassert_ps_hold_supported = true;
-
-#ifdef CONFIG_PRODUCT_REALME
-	/*YiXue.Ge@PSW.BSP.Kernel.Driver,2017/05/15,
-	 * Add for can disable minidump by rom update
-	 */
-
-	if(romupdate_minidumpdisable){
-		download_mode = 0;
-	}
-#endif
 
 #ifdef CONFIG_QCOM_DLOAD_MODE
 	set_dload_mode(download_mode);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -266,6 +266,7 @@
 };
 
 #include "msm8996-ion.dtsi"
+#include "msm8996-sde.dtsi"
 #include "msm8996-mdss.dtsi"
 #include "msm8996-mdss-pll.dtsi"
 #include "msm8996-smp2p.dtsi"
@@ -404,12 +405,9 @@
 		clock-names = "iface_clk", "core_clk";
 		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
 			 <&clock_gcc clk_gcc_blsp2_qup6_i2c_apps_clk>;
-		qcom,i2c-dat = <&tlmm 87 0x00>;
-		qcom,i2c-clk = <&tlmm 88 0x00>;
-		pinctrl-names = "i2c_active", "i2c_sleep", "i2c_bitbang";
+		pinctrl-names = "i2c_active", "i2c_sleep";
 		pinctrl-0 = <&i2c_12_active>;
 		pinctrl-1 = <&i2c_12_sleep>;
-		pinctrl-2 = <&i2c_12_bitbang>;
 	};
 
 
@@ -446,12 +444,9 @@
 		clock-names = "iface_clk", "core_clk";
 		clocks = <&clock_gcc clk_gcc_blsp1_ahb_clk>,
 			 <&clock_gcc clk_gcc_blsp1_qup6_i2c_apps_clk>;
-		qcom,i2c-dat = <&tlmm 27 0x00>;
-		qcom,i2c-clk = <&tlmm 28 0x00>;
-		pinctrl-names = "i2c_active", "i2c_sleep", "i2c_bitbang";
+		pinctrl-names = "i2c_active", "i2c_sleep";
 		pinctrl-0 = <&i2c_6_active>;
 		pinctrl-1 = <&i2c_6_sleep>;
-		pinctrl-2 = <&i2c_6_bitbang>;
 	};
 
 	i2c_7: i2c@75b5000 { /* BLSP2 QUP1 */
@@ -471,12 +466,9 @@
 		clock-names = "iface_clk", "core_clk";
 		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
 			 <&clock_gcc clk_gcc_blsp2_qup1_i2c_apps_clk>;
-		qcom,i2c-dat = <&tlmm 55 0x00>;
-		qcom,i2c-clk = <&tlmm 56 0x00>;
-		pinctrl-names = "i2c_active", "i2c_sleep", "i2c_bitbang";
+		pinctrl-names = "i2c_active", "i2c_sleep";
 		pinctrl-0 = <&i2c_7_active>;
 		pinctrl-1 = <&i2c_7_sleep>;
-		pinctrl-2 = <&i2c_7_bitbang>;
 	};
 
 	i2c_8: i2c@75b6000 { /* BLSP2 QUP2 */
@@ -496,12 +488,9 @@
 		clock-names = "iface_clk", "core_clk";
 		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
 			<&clock_gcc clk_gcc_blsp2_qup2_i2c_apps_clk>;
-		qcom,i2c-dat = <&tlmm 6 0x00>;
-		qcom,i2c-clk = <&tlmm 7 0x00>;
-		pinctrl-names = "i2c_active", "i2c_sleep", "i2c_bitbang";
+		pinctrl-names = "i2c_active", "i2c_sleep";
 		pinctrl-0 = <&i2c_8_active>;
 		pinctrl-1 = <&i2c_8_sleep>;
-		pinctrl-2 = <&i2c_8_bitbang>;
 	};
 
 	blsp1_uart2: uart@07570000 { /* BLSP1 UART2 */
@@ -2018,6 +2007,7 @@
 			snps,nominal-elastic-buffer;
 			snps,is-utmi-l1-suspend;
 			snps,hird-threshold = /bits/ 8 <0x0>;
+			usb-core-id = <0>;
 		};
 
 		qcom,usbbam@6b04000 {
@@ -2126,6 +2116,7 @@
 			snps,nominal-elastic-buffer;
 			snps,is-utmi-l1-suspend;
 			snps,hird-threshold = /bits/ 8 <0x0>;
+			usb-core-id = <1>;
 		};
 	};
 
@@ -2983,8 +2974,8 @@
 	qcom,msm-core@70000 {
 		compatible = "qcom,apss-core-ea";
 		reg = <0x70000 0x1000>;
-		qcom,low-hyst-temp = <100>;
-		qcom,high-hyst-temp = <100>;
+		qcom,low-hyst-temp = <10>;
+		qcom,high-hyst-temp = <5>;
 		qcom,polling-interval = <50>;
 
 		ea0: ea0 {

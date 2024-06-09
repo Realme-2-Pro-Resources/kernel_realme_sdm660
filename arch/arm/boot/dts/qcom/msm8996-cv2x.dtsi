@@ -62,7 +62,6 @@
 		compatible = "qcom,ntn_avb";
 		vdd-ntn-pci-supply = <&ntn_vreg>;
 		vdd-ntn-io-supply = <&ntn_vreg>;
-		ntn-rst-gpio = <&pm8994_gpios 13 0>;
 		qcom,ntn-rst-delay-msec = <100>;
 		qcom,ntn-rc-num = <1>;
 		qcom,ntn-bus-num = <1>;
@@ -75,8 +74,6 @@
 				<100 512 0 0>,
 				<100 512 207108 14432000>;
 		qcom,ntn-pcierst-resx;
-		qcom,txc-skew-ps = <1860>;
-		qcom,rxc-skew-ps = <1860>;
 	};
 
 	usb_detect: usb_detect {
@@ -191,13 +188,14 @@
 		qcom,mhi = <&mhi>;
 		status = "okay";
 	};
-
-	qcom,diagfwd-usb {
-		compatible = "qcom,diagfwd-usb";
-		status = "okay";
-	};
 };
 
+/delete-node/ &sde_kms;
+/delete-node/ &sde_dsi0;
+/delete-node/ &sde_dsi1;
+/delete-node/ &sde_dsi_phy0;
+/delete-node/ &sde_dsi_phy1;
+/delete-node/ &sde_hdmi_tx;
 /delete-node/ &mdss_mdp;
 /delete-node/ &mdss_dsi;
 /delete-node/ &msm_ext_disp;
@@ -229,19 +227,14 @@
 	status = "okay";
 
 	can-controller@0 {
-		compatible = "qcom,nxp,mpc5746c";
+		compatible = "nxp,mpc5746c";
 		reg = <0>;
 		spi-max-frequency = <9600000>;
 		interrupt-parent = <&tlmm>;
-		interrupts = <78 2>;
-		qcom,reset-gpio = <&tlmm 71 GPIO_ACTIVE_LOW>;
-		qcom,clk-freq-mhz = <20000000>;
-		qcom,max-can-channels = <2>;
-		qcom,bits-per-word = <8>;
-		qcom,reset-delay-msec = <300>;
-		qcom,can-fw-cmd-timeout-req;
-		qcom,can-fw-cmd-timeout-ms = <400>;
-		qcom,rem-all-buffering-timeout-ms = <2000>;
+		interrupts = <78 0>;
+		reset-gpio = <&tlmm 71 GPIO_ACTIVE_LOW>;
+		bits-per-word = <8>;
+		reset-delay-msec = <300>;
 		pinctrl-names = "active", "sleep";
 		pinctrl-0 = <&can_rst_on>;
 		pinctrl-1 = <&can_rst_off>;
@@ -471,17 +464,6 @@
 		status = "okay";
 	};
 
-	gpio@cc00 { /* GPIO 13 - NTN_RST */
-		qcom,mode = <1>; /* DIGITAL OUT */
-		qcom,output-type = <0>; /* CMOS logic */
-		qcom,pull = <5>;
-		qcom,vin-sel = <2>; /* 1.8 */
-		qcom,out-strength = <1>;
-		qcom,src-sel = <0>; /* GPIO */
-		qcom,master-en = <1>; /* Enable GPIO */
-		status = "okay";
-	};
-
 	gpio@d000 { /* GPIO 17 - USB1 VBUS detect */
 		qcom,mode = <0>;		/* Digital Input*/
 		qcom,pull = <5>;		/* No pull */
@@ -505,7 +487,7 @@
 
 &pm8994_mpps {
 	mpp@a100 { /* MPP 2 */
-		/* MDM_RESIN_N control */
+		/* MDM PON conrol*/
 		qcom,mode = <1>;		/* Digital output */
 		qcom,output-type = <0>;		/* CMOS logic */
 		qcom,vin-sel = <2>;		/* S4 1.8V */
@@ -521,17 +503,6 @@
 		qcom,vin-sel = <2>;		/* S4 1.8V */
 		qcom,src-sel = <0>;		/* Constant */
 		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "okay";
-	};
-
-	mpp@a700 { /* MPP 8 */
-		/* MDM_PON_1 control */
-		qcom,mode = <1>;		/* Digital output */
-		qcom,output-type = <0>;		/* CMOS logic */
-		qcom,vin-sel = <2>;		/* S4 1.8V */
-		qcom,src-sel = <0>;		/* Constant */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		qcom,invert = <0>;		/* Output low */
 		status = "okay";
 	};
 };

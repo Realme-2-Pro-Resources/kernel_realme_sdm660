@@ -15,7 +15,7 @@ qcom,itech_3000mah {
 	qcom,max-voltage-uv = <4350000>;
 	qcom,fg-cc-cv-threshold-mv = <4340>;
 	qcom,fastchg-current-ma = <2000>;
-	qcom,batt-id-kohm = <100>;
+	qcom,batt-id-kohm = <200>;
 	qcom,battery-beta = <3435>;
 	qcom,battery-type = "itech_b00826lf_3000mah_ver1660_jan10th2017";
 	qcom,checksum = <0xFB8F>;

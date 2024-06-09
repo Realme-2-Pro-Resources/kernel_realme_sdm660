@@ -28,15 +28,6 @@
 	qcom,msm-id = <246 0x0>;
 };
 
-&ion {
-	/delete-node/ qcom,ion-heap@25;
-
-	system_heap: qcom,ion-heap@25 {
-		reg = <25>;
-		qcom,ion-heap-type = "SYSTEM";
-	};
-};
-
 &reserved_memory {
 	modem_mem: modem_region@88800000 {
 		compatible = "removed-dma-pool";
@@ -56,6 +47,11 @@
 		reusable;
 		alignment = <0 0x100000>;
 		size = <0 0x400000>;
+	};
+
+	ion_system: ion_system_region@ff000000 {
+		reg = <0 0xff000000 0 0x00400000>;
+		label = "ion_system_mem";
 	};
 };
 
@@ -89,35 +85,6 @@
 		};
 	};
 
-	qcom,hab {
-		compatible = "qcom,hab";
-		vmid = <2>;
-
-		mmidgrp600: mmidgrp600 {
-			grp-start-id = <600>;
-			role = "fe";
-			remote-vmids = <0>;
-		};
-
-		mmidgrp700: mmidgrp700 {
-			grp-start-id = <700>;
-			role = "fe";
-			remote-vmids = <0>;
-		};
-
-		mmidgrp800: mmidgrp800 {
-			grp-start-id = <800>;
-			role = "fe";
-			remote-vmids = <0>;
-		};
-
-		mmidgrp900: mmidgrp900 {
-			grp-start-id = <900>;
-			role = "fe";
-			remote-vmids = <0>;
-		};
-	};
-
 	qcom,cnss {
 		compatible = "qcom,cnss";
 		wlan-bootstrap-gpio = <&tlmm 46 0>;
@@ -132,7 +99,6 @@
 		pinctrl-names = "bootstrap_active", "bootstrap_sleep";
 		pinctrl-0 = <&cnss_bootstrap_active>;
 		pinctrl-1 = <&cnss_bootstrap_sleep>;
-		qcom,wlan-ramdump-dynamic = <0x200000>;
 
 		qcom,msm-bus,name = "msm-cnss";
 		qcom,msm-bus,num-cases = <4>;
@@ -180,26 +146,18 @@
 		qcom,edge = "lpass";
 		qcom,notify-edges = <&glink_mpss>;
 		qcom,xprt = "smem";
-	};
 
 	subsys_notif_virt: qcom,subsys_notif_virt@2D000000 {
 		compatible = "qcom,subsys-notif-virt";
-		reg = <0x2D000000 0x400>;
+		reg = <0x2D000000 0x10>;
 		reg-names = "vdev_base";
 		adsp {
 			subsys-name = "adsp";
-			type = "native";
 			offset = <0>;
 		};
 		mpss {
 			subsys-name = "modem";
-			type = "native";
-			offset = <256>;
-		};
-		wlan {
-			subsys-name = "AR6320";
-			type = "native";
-			offset = <512>;
+			offset = <8>;
 		};
 	};
 };

@@ -794,10 +794,18 @@ static long msm_vfe40_reset_hardware(struct vfe_device *vfe_dev,
 	}
 
 
+#ifndef CONFIG_PRODUCT_REALME_RMX1801
 	if (blocking_call) {
 		rc = wait_for_completion_timeout(
 			&vfe_dev->reset_complete, msecs_to_jiffies(50));
 	}
+#else
+	if (blocking_call) {
+		rc = wait_for_completion_timeout(
+			&vfe_dev->reset_complete, msecs_to_jiffies(500));
+	}
+#endif
+
 	return rc;
 }
 

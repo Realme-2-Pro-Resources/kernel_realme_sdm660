@@ -811,6 +811,17 @@ static int gic_set_affinity(struct irq_data *d, const struct cpumask *mask_val,
 
 	gic_write_irouter(val, reg);
 
+#ifdef CONFIG_PRODUCT_REALME_RMX1801
+//Fuchun.Liao@BSP.CHG.Basic 2017/03/03 add for dwc3 irq and power issue,case02837665
+	/*
+	* It is possible that irq is disabled from SW perspective only, 
+	* because kernel takes lazy disable approach. Therefore check irq 
+	* descriptor if it should kept disabled. 
+	*/ 
+	if (irqd_irq_disabled(d)) 
+		enabled = 0;  	
+#endif /* CONFIG_PRODUCT_REALME_RMX1801 */
+
 	/*
 	 * It is possible that irq is disabled from SW perspective only,
 	 * because kernel takes lazy disable approach. Therefore check irq

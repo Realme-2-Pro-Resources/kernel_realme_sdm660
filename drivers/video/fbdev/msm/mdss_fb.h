@@ -27,6 +27,12 @@
 #define MDSS_LPAE_CHECK(phys)	\
 	((sizeof(phys) > sizeof(unsigned long)) ? ((phys >> 32) & 0xFF) : (0))
 
+#ifdef CONFIG_PRODUCT_REALME_RMX1801
+//Gou shengjun@MultiMedia.Display.LCD.Stability, 2017/02/15,
+//add for 16051 read LCM window info
+#define PANEL_BLACK 0x01
+#define PANEL_WHITE 0x02
+#endif /*VEDNOR_EDIT*/
 #define MSM_FB_DEFAULT_PAGE_SIZE 2
 #define MFD_KEY  0x11161126
 #define MSM_FB_MAX_DEV_LIST 32

@@ -161,6 +161,10 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 export DTC_FLAGS := -@
 endif
 
+KBUILD_CFLAGS += -DVENDOR_EDIT=y
+export OPPO_TARGET_DEVICE=MSM_18321
+export TARGET_PRODUCT=sdm660_64
+
 all:	$(KBUILD_IMAGE) $(KBUILD_DTBS)
 
 boot := arch/arm64/boot

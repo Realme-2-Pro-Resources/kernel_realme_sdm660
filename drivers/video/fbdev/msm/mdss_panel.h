@@ -313,6 +313,13 @@ enum mdss_intf_events {
 	MDSS_EVENT_REGISTER_CLAMP_HANDLER,
 	MDSS_EVENT_DSI_DYNAMIC_BITCLK,
 	MDSS_EVENT_UPDATE_LIVEDISPLAY,
+
+#ifdef VENDOR_EDIT
+//Shengjun.Gou@PSW.MM.Display.LCD.Feature, 2018/01/03,
+//add for dynamic mipi dsi clk
+	MDSS_EVENT_PANEL_UPDATE_DSI_TIMING,
+#endif /*VENDOR_EDIT*/
+
 	MDSS_EVENT_MAX,
 };
 
@@ -814,6 +821,14 @@ struct mdss_panel_info {
 	int pwm_lpg_chan;
 	int pwm_period;
 	bool dynamic_fps;
+
+#ifdef VENDOR_EDIT
+//Shengjun.Gou@PSW.MM.Display.LCD.Feature, 2018/01/03,
+//add for dynamic mipi dsi clk
+	bool dynamic_dsitiming;
+	u32  cached_clk_rate;
+#endif /*VENDOR_EDIT*/
+
 	bool dynamic_bitclk;
 	u32 *supp_bitclks;
 	u32 supp_bitclk_len;

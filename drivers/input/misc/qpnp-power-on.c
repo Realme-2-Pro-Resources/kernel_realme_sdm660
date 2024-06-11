@@ -2127,6 +2127,11 @@ static int qpnp_pon_probe(struct platform_device *pdev)
 		boot_reason = ffs(pon_sts);
 
 	index = ffs(pon_sts) - 1;
+#ifdef VENDOR_EDIT
+/* fanhui@PhoneSW.BSP, 2016/05/18, when KPDPWR_N is set it is PWK start*/
+	if (pon_sts & 0x80)
+		index = 7;
+#endif /*VENDOR_EDIT*/
 	cold_boot = !qpnp_pon_is_warm_reset();
 	if (index >= ARRAY_SIZE(qpnp_pon_reason) || index < 0) {
 		dev_info(&pon->pdev->dev,

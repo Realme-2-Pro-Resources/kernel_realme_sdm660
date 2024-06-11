@@ -58,6 +58,18 @@
 
 #include "mdss_livedisplay.h"
 
+#ifdef VENDOR_EDIT
+/*
+* Guoqiang.jiang@MultiMedia.Display.LCD.Stability, 2018/10/12,
+* add for get panel serial number
+*/
+#include <soc/oppo/oppo_project.h>
+#include <soc/oppo/boot_mode.h>
+#include "mdss_dsi.h"
+#include <linux/completion.h>
+static int boot_mode = 0;
+#endif /*VENDOR_EDIT*/
+
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
 #define MDSS_FB_NUM 3
 #else
@@ -93,6 +105,13 @@ static u32 mdss_fb_pseudo_palette[16] = {
 	0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
 	0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff
 };
+
+
+#ifdef IS_PROJECT_18321
+int system_backlight_target = 944;
+#else   /*IS_PROJECT_18321*/
+int system_backlight_target = 235;
+#endif /*IS_PROJECT_18321*/
 
 static struct msm_mdp_interface *mdp_instance;
 
@@ -866,6 +885,103 @@ static ssize_t mdss_fb_get_dfps_mode(struct device *dev,
 	return ret;
 }
 
+#ifdef VENDOR_EDIT
+extern ssize_t oppo_dynamic_fps_contrl(struct mdss_panel_data *pdata,
+	struct fb_info *fbi);
+bool oppo_dynamic_fps_disable_switch = false;
+/* Guoqiang.Jiang@PSW.MM.Driver.feature, 2017/03/17, add for dynamic fps switch*/
+static ssize_t dynamic_fps_switch_set(struct device *dev,
+							   struct device_attribute *attr,
+							   const char *buf, size_t count)
+{
+	uint8_t dynamic_fps_switch = 0x0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+
+	if (is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL))
+	{
+		if (kstrtou8(buf, 0, &dynamic_fps_switch)) {
+			pr_err("kstrtouint buf error!\n");
+			return count;
+		}
+		if (dynamic_fps_switch == 0x1)
+		{
+			oppo_dynamic_fps_disable_switch = false;
+
+		} else {
+			oppo_dynamic_fps_disable_switch = true;
+			oppo_dynamic_fps_contrl(pdata, fbi);
+		}
+
+		pr_info("%s set dynamic_fps to %x", __func__, dynamic_fps_switch);
+	}
+
+	return count;
+}
+
+static ssize_t dynamic_fps_switch_get(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	int ret = 0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+
+	if (oppo_dynamic_fps_disable_switch)
+	{
+		ret = 0;
+	} else {
+		ret = 1;
+	}
+
+	pr_info("%s Current dynamic_fps is %d", __func__, pdata->panel_info.mipi.frame_rate);
+
+	return sprintf(buf, "%d\n", ret);
+}
+
+//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/14,
+//add for lcd cabc
+extern int set_cabc(int level);
+extern int cabc_mode;
+
+static ssize_t mdss_get_cabc(struct device *dev,
+        struct device_attribute *attr, char *buf)
+{
+	if(!(is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL)))
+	{
+		return 0;
+	}
+	printk(KERN_INFO "get cabc mode = %d\n",cabc_mode);
+
+	return sprintf(buf, "%d\n", cabc_mode);
+}
+
+static ssize_t mdss_set_cabc(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *buf, size_t count)
+{
+	int level = 0;
+
+	if(!(is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL)))
+	{
+		return count;
+	}
+
+	sscanf(buf, "%du", &level);
+	set_cabc(level);
+	return count;
+}
+
+//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/14,
+//add for lcd cabc
+static DEVICE_ATTR(cabc, S_IRUGO|S_IWUSR, mdss_get_cabc, mdss_set_cabc);
+#endif /*VENDOR_EDIT*/
+
+
 static ssize_t mdss_fb_change_persist_mode(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t len)
 {
@@ -959,6 +1075,13 @@ static DEVICE_ATTR(msm_fb_dfps_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_dfps_mode, mdss_fb_change_dfps_mode);
 static DEVICE_ATTR(measured_fps, S_IRUGO | S_IWUSR | S_IWGRP,
 	mdss_fb_get_fps_info, NULL);
+#ifdef VENDOR_EDIT
+/* Gou shengjun@PSW.MM.Driver.feature, 2018/07/27,
+* add for dynamic fps switch
+ */
+static DEVICE_ATTR(dynamic_fps_switch, S_IRUGO|S_IWUSR, dynamic_fps_switch_get, dynamic_fps_switch_set);
+#endif /*VENDOR_EDIT*/
+
 static DEVICE_ATTR(msm_fb_persist_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_persist_mode, mdss_fb_change_persist_mode);
 static DEVICE_ATTR(idle_power_collapse, S_IRUGO, mdss_fb_idle_pc_notify, NULL);
@@ -977,6 +1100,16 @@ static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_msm_fb_dfps_mode.attr,
 	&dev_attr_measured_fps.attr,
 	&dev_attr_msm_fb_persist_mode.attr,
+#ifdef VENDOR_EDIT
+//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/14,
+//add for lcd cabc
+	&dev_attr_cabc.attr,
+/* Gou shengjun@PSW.MM.Driver.feature, 2018/07/27,
+ *add for dynamic fps switch
+*/
+	&dev_attr_dynamic_fps_switch.attr,
+#endif /*VENDOR_EDIT*/
+
 	&dev_attr_idle_power_collapse.attr,
 	NULL,
 };
@@ -1313,11 +1446,27 @@ static int mdss_fb_probe(struct platform_device *pdev)
 	}
 
 	mfd->ext_ad_ctrl = -1;
+#ifndef VENDOR_EDIT
+//Guoqiang.Jiang@PSW.MM.Display.LCD.Stability, 2018/10/31,
+//modify for lcd happen esd set backlight 127 before set system backlight
 	if (mfd->panel_info && mfd->panel_info->brightness_max > 0)
 		MDSS_BRIGHT_TO_BL(mfd->bl_level, backlight_led.brightness,
 		mfd->panel_info->bl_max, mfd->panel_info->brightness_max);
 	else
 		mfd->bl_level = 0;
+#else /*VENDOR_EDIT*/
+	if (mfd->panel_info && mfd->panel_info->brightness_max > 0){
+		MDSS_BRIGHT_TO_BL(mfd->bl_level, backlight_led.brightness,
+		mfd->panel_info->bl_max, mfd->panel_info->brightness_max);
+		if(mfd->panel_info->bl_max > 1023){
+			mfd->bl_level = 1600;   /*for 2048 level backlight set same to lk 1600*/
+		}else{
+			mfd->bl_level = 200;	/*for 200 level backlight set same to lk 200*/
+		}
+	}
+	else
+		mfd->bl_level = 0;
+#endif /*VENDOR_EDIT*/
 
 	mfd->bl_scale = 1024;
 	mfd->ad_bl_level = 0;
@@ -1748,6 +1897,9 @@ void mdss_fb_set_backlight(struct msm_fb_data_type *mfd, u32 bkl_lvl)
 	bool ad_bl_notify_needed = false;
 	bool bl_notify_needed = false;
 
+#ifndef VENDOR_EDIT
+//Shengjun.Gou@PSW.MM.Display.LCD.Stability, 2017/02/14,
+//modify for Lcd ftm mode backlight
 	if ((((mdss_fb_is_power_off(mfd) && mfd->dcm_state != DCM_ENTER)
 		|| !mfd->allow_bl_update) && !IS_CALIB_MODE_BL(mfd)) ||
 		mfd->panel_info->cont_splash_enabled) {
@@ -1758,6 +1910,23 @@ void mdss_fb_set_backlight(struct msm_fb_data_type *mfd, u32 bkl_lvl)
 	} else {
 		mfd->unset_bl_level = U32_MAX;
 	}
+#else /*VENDOR_EDIT*/
+	boot_mode =get_boot_mode();
+	if(boot_mode == MSM_BOOT_MODE__FACTORY){
+			mfd->unset_bl_level = 0;
+	}else{
+		if ((((mdss_fb_is_power_off(mfd) && mfd->dcm_state != DCM_ENTER)
+			|| !mfd->allow_bl_update) && !IS_CALIB_MODE_BL(mfd)) ||
+			mfd->panel_info->cont_splash_enabled) {
+			mfd->unset_bl_level = bkl_lvl;
+			return;
+		} else if (mdss_fb_is_power_on(mfd) && mfd->panel_info->panel_dead) {
+			mfd->unset_bl_level = mfd->bl_level;
+		} else {
+			mfd->unset_bl_level = U32_MAX;
+		}
+	}
+#endif /*VENDOR_EDIT*/
 
 	pdata = dev_get_platdata(&mfd->pdev->dev);
 
@@ -1999,7 +2168,11 @@ static int mdss_fb_blank_unblank(struct msm_fb_data_type *mfd)
 	}
 
 	/* Reset the backlight only if the panel was off */
+	#ifdef VENDOR_EDIT
+	if (mdss_panel_is_power_off(cur_power_state) || mdss_panel_is_power_on_lp (cur_power_state) ) {
+	#else
 	if (mdss_panel_is_power_off(cur_power_state)) {
+	#endif
 		mutex_lock(&mfd->bl_lock);
 		if (!mfd->allow_bl_update) {
 			mfd->allow_bl_update = true;

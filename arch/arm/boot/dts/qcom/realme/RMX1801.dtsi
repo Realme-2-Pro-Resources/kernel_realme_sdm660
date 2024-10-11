@@ -30,7 +30,7 @@
     android {
         fstab {
             vendor {
-                mnt_flags = "ro,barrier=1,async_discard";
+                mnt_flags = "ro,barrier=1";
                 fsmgr_flags = "wait";
             };
         };

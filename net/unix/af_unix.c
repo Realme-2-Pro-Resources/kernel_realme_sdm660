@@ -1717,8 +1717,8 @@ static int unix_dgram_sendmsg(struct socket *sock, struct msghdr *msg,
 
 	timeo = sock_sndtimeo(sk, msg->msg_flags & MSG_DONTWAIT);
 
-restart:
 	if (!other) {
+lookup:
 		err = -ECONNRESET;
 		if (sunaddr == NULL)
 			goto out_free;
@@ -1735,6 +1735,7 @@ restart:
 		goto out_free;
 	}
 
+restart:
 	sk_locked = 0;
 	unix_state_lock(other);
 restart_locked:
@@ -1770,7 +1771,8 @@ restart_locked:
 		other = NULL;
 		if (err)
 			goto out_free;
-		goto restart;
+
+		goto lookup;
 	}
 
 	err = -EPIPE;

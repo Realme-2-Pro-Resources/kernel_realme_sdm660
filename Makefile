@@ -421,6 +421,12 @@ KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 LDFLAGS :=
 CLANG_FLAGS :=
 
+# VENDOR_EDIT begin
+KBUILD_CFLAGS += -DVENDOR_EDIT=1 -DIS_PROJECT_18321=1
+OPPO_TARGET_DEVICE ?= MSM_18321
+export OPPO_TARGET_DEVICE
+# VENDOR_EDIT end
+
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
 KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)

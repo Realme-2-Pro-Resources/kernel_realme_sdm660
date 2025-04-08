@@ -28,7 +28,16 @@
 #define XLOG_DEFAULT_ENABLE 0
 #endif
 
+#ifndef VENDOR_EDIT
+/*
+ * Guoqiang.Jiang@PSW.MM.Display.LCD.Stability, 2018/10/31,
+ * add for sdm660 open xlog panic off
+*/
 #define XLOG_DEFAULT_PANIC 1
+#else /* VENDOR_EDIT */
+#define XLOG_DEFAULT_PANIC 0
+#endif /* VENDOR_EDIT */
+
 #define XLOG_DEFAULT_REGDUMP 0x2 /* dump in RAM */
 #define XLOG_DEFAULT_DBGBUSDUMP 0x2 /* dump in RAM */
 #define XLOG_DEFAULT_VBIF_DBGBUSDUMP 0x2 /* dump in RAM */

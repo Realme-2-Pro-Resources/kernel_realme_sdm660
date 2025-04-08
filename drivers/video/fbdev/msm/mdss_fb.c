@@ -58,6 +58,17 @@
 
 #include "mdss_livedisplay.h"
 
+#ifdef VENDOR_EDIT
+#include <soc/oppo/boot_mode.h>
+#include "mdss_dsi.h"
+
+/*
+* Guoqiang.Jiang@MultiMedia.Display.LCD.Stability, 2017/10/16,
+* add for panel status
+*/
+int lcd_closebl_flag = 0;
+#endif /*VENDOR_EDIT*/
+
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
 #define MDSS_FB_NUM 3
 #else
@@ -866,6 +877,247 @@ static ssize_t mdss_fb_get_dfps_mode(struct device *dev,
 	return ret;
 }
 
+#ifdef VENDOR_EDIT
+extern ssize_t oppo_dynamic_fps_contrl(struct mdss_panel_data *pdata,
+	struct fb_info *fbi);
+bool oppo_dynamic_fps_disable_switch = false;
+/* Guoqiang.Jiang@PSW.MM.Driver.feature, 2017/03/17, add for dynamic fps switch*/
+static ssize_t dynamic_fps_switch_set(struct device *dev,
+							   struct device_attribute *attr,
+							   const char *buf, size_t count)
+{
+	uint8_t dynamic_fps_switch = 0x0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+
+	if (is_lcd(OPPO18136_HIMAX_HX83112A_1080_2340_VOD_PANEL)
+		|| is_lcd(OPPO18321_DPT_NT36672A_1080_2340_VOD_PANEL))
+	{
+		if (kstrtou8(buf, 0, &dynamic_fps_switch)) {
+			pr_err("kstrtouint buf error!\n");
+			return count;
+		}
+		if (dynamic_fps_switch == 0x1)
+		{
+			oppo_dynamic_fps_disable_switch = false;
+
+		} else {
+			oppo_dynamic_fps_disable_switch = true;
+			oppo_dynamic_fps_contrl(pdata, fbi);
+		}
+
+		pr_info("%s set dynamic_fps to %x", __func__, dynamic_fps_switch);
+	}
+
+	return count;
+}
+static ssize_t dynamic_fps_switch_get(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	int ret = 0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+
+	if (oppo_dynamic_fps_disable_switch)
+	{
+		ret = 0;
+	} else {
+		ret = 1;
+	}
+
+	pr_info("%s Current dynamic_fps is %d", __func__, pdata->panel_info.mipi.frame_rate);
+
+	return sprintf(buf, "%d\n", ret);
+}
+
+//Shengjun.Gou@PSW.MM.Display.LCD.Stability, 2017/01/24,
+//add for lcd esd test
+extern void set_esd_mode(int level);
+static ssize_t mdss_get_esd(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	set_esd_mode(0);
+	return sprintf(buf, "%d\n", 0);
+}
+
+//Gou Shengjun@MultiMedia.Display.LCD.Stability, 2017/01/20,
+//add for adb mipi read/write lcd reg
+extern void send_user_write_reg(char *par, u32 cnt);
+static ssize_t mdss_set_lcd_reg(struct device *dev,
+							   struct device_attribute *attr,
+							   const char *user_buf, size_t count)
+{
+	char buf[200];
+	char par[30];
+	char *p = NULL,*p1;
+
+	u32 cnt=0,i=0;
+	strcpy(buf,user_buf);
+	while(buf[i]==' ')
+	{
+		i++;
+	}
+	p=&buf[i];
+	do{
+		p1=strsep(&p," ");
+		sscanf(p1,"%x",(int*)&par[cnt]);
+		cnt++;
+	} while (p!=NULL);
+	for(i=0;i<cnt;i++)
+	{
+		pr_err("%x ",par[i]);
+	}
+	send_user_write_reg(par,cnt);
+
+	return count;
+}
+extern void dump_lcd_reg(size_t off,u32 data,char* dump_data);
+static u32 lcd_reg_off,lcd_reg_num;
+static bool dump_reg_update = false;
+static ssize_t mdss_lcd_reg_dump_write(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *user_buf, size_t count)
+{
+	char buf[50];
+	u32 cnt;
+	strcpy(buf,user_buf);
+
+	cnt = sscanf(buf, "%x %x", &lcd_reg_off, &lcd_reg_num);
+	pr_err("addr=%x data=%x\n", lcd_reg_off, lcd_reg_num);
+	dump_reg_update = true;
+	return count;
+}
+
+#define REG_CNT_R 16 //Read reg counts
+
+static ssize_t mdss_lcd_reg_dump_read(struct device *dev,
+  struct device_attribute *attr, char *buf)
+{
+	int ret = 0;
+	char dump_data[REG_CNT_R*5+1];
+
+	if(!dump_reg_update)
+		return ret;
+
+	dump_lcd_reg(lcd_reg_off,lcd_reg_num,dump_data);
+	ret = scnprintf(buf, PAGE_SIZE, "%s\n", dump_data);
+	dump_reg_update = false;
+
+	return ret;
+}
+
+//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/13,
+//add for lcd off event for ftm
+static ssize_t mdss_mdp_lcdoff_event(struct device *dev,
+        struct device_attribute *attr, char *buf)
+{
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
+
+	pr_err("%s mfd=0x%p\n", __func__, mfd);
+	if (!mfd)
+		return -ENODEV;
+
+	//return sprintf(buf,"mdss_fb_suspend_sub is called\n");
+
+	//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/13,
+	//add for lcd to dump for ftm
+	return mdss_fb_send_panel_event(mfd, MDSS_EVENT_DISABLE_PANEL, NULL);
+}
+
+static ssize_t mdss_get_closebl_flag(struct device *dev,
+                                struct device_attribute *attr, char *buf)
+{
+	printk(KERN_INFO "get closebl flag = %d\n",lcd_closebl_flag);
+	return sprintf(buf, "%d\n", lcd_closebl_flag);
+}
+
+static ssize_t mdss_set_closebl_flag(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *buf, size_t count)
+{
+	int closebl = 0;
+	sscanf(buf, "%du", &closebl);
+	pr_err("lcd_closebl_flag = %d\n",closebl);
+	if(1 != closebl)
+		lcd_closebl_flag = 0;
+	pr_err("mdss_set_closebl_flag = %d\n",lcd_closebl_flag);
+	return count;
+}
+
+#ifdef VENDOR_EDIT
+/*
+ * Gou shegnjun@PSW.MM.Display.LCD.Stability,2018/01/22,
+ * add for lcm id read
+*/
+static uint8_t lcm_id_addr = 0x0;
+extern void lcm_id_read(char reg_addr, char* buf, int lenth);
+
+static ssize_t lcm_set_id_addr(struct device *dev,
+                               struct device_attribute *attr,
+                               const char *buf, size_t count)
+{
+	if (kstrtou8(buf, 0, &lcm_id_addr))
+	{
+		pr_err("%s kstrtouu8 buf error!\n", __func__);
+		return count;
+	}
+
+	pr_info("%s set lcm id address:0x%2x.\n", __func__, lcm_id_addr);
+
+	return count;
+}
+
+static ssize_t lcm_get_id_info(struct device *dev,
+        struct device_attribute *attr, char *buf)
+{
+	int ret = 0;
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	struct msm_fb_data_type *mfd = fbi->par;
+	struct mdss_panel_data *pdata = dev_get_platdata(&mfd->pdev->dev);
+	int lcm_id_read_len = 2;
+	uint8_t lcm_id_info[16] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+							   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+
+	if (!pdata)
+	{
+		pr_err("no panel connected!\n");
+		return -1;
+	}
+
+	if (mdss_panel_is_power_off(mfd->panel_power_state))
+	{
+		pr_err("panel is off, read panel reg forbidden!\n");
+		return -1;
+	}
+
+	if (0x0 != lcm_id_addr)
+	{
+		lcm_id_read(lcm_id_addr, lcm_id_info, lcm_id_read_len);
+		ret = scnprintf(buf, PAGE_SIZE, "LCM ID[%x]: 0x%x 0x%x\n", lcm_id_addr, lcm_id_info[0], lcm_id_info[1]);
+		lcm_id_addr = 0x0;
+	} else {
+		ret = scnprintf(buf, PAGE_SIZE, "LCM ID[00]: 0x00 0x00\n");
+	}
+
+	return ret;
+}
+#endif /*VENDOR_EDIT*/
+
+static DEVICE_ATTR(dump_reg, S_IRUGO|S_IWUSR, mdss_lcd_reg_dump_read, mdss_lcd_reg_dump_write);
+static DEVICE_ATTR(lcd_reg, S_IRUGO|S_IWUSR, NULL, mdss_set_lcd_reg);
+static DEVICE_ATTR(esd, S_IRUGO, mdss_get_esd, NULL);
+//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/13,
+//add for lcd off event for ftm
+static DEVICE_ATTR(lcdoff, S_IRUGO, mdss_mdp_lcdoff_event, NULL);
+//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/14,
+//add for lcd cabc
+static DEVICE_ATTR(closebl, 0664, mdss_get_closebl_flag, mdss_set_closebl_flag);
+#endif /*VENDOR_EDIT*/
+
+
 static ssize_t mdss_fb_change_persist_mode(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t len)
 {
@@ -959,6 +1211,16 @@ static DEVICE_ATTR(msm_fb_dfps_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_dfps_mode, mdss_fb_change_dfps_mode);
 static DEVICE_ATTR(measured_fps, S_IRUGO | S_IWUSR | S_IWGRP,
 	mdss_fb_get_fps_info, NULL);
+#ifdef VENDOR_EDIT
+//Gou shengjun@PSW.MM.Display.LCD.Stability, 2017/02/15,
+//add for 16051 read LCM window info
+static DEVICE_ATTR(lcm_id_info, S_IRUGO | S_IWUSR, lcm_get_id_info, lcm_set_id_addr);
+/* Gou shengjun@PSW.MM.Driver.feature, 2018/07/27,
+* add for dynamic fps switch
+ */
+static DEVICE_ATTR(dynamic_fps_switch, S_IRUGO|S_IWUSR, dynamic_fps_switch_get, dynamic_fps_switch_set);
+#endif /*VENDOR_EDIT*/
+
 static DEVICE_ATTR(msm_fb_persist_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_persist_mode, mdss_fb_change_persist_mode);
 static DEVICE_ATTR(idle_power_collapse, S_IRUGO, mdss_fb_idle_pc_notify, NULL);
@@ -977,6 +1239,27 @@ static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_msm_fb_dfps_mode.attr,
 	&dev_attr_measured_fps.attr,
 	&dev_attr_msm_fb_persist_mode.attr,
+	#ifdef VENDOR_EDIT
+	//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/01/20,
+	//add for adb mipi read/write lcd reg
+	&dev_attr_dump_reg.attr,
+	&dev_attr_lcd_reg.attr,
+	&dev_attr_esd.attr,
+	//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/13,
+	//add for lcd off event for ftm
+	&dev_attr_lcdoff.attr,
+	//YongPeng.Yi@MultiMedia.Display.LCD.Stability, 2017/02/14,
+	//add for lcd cabc
+	&dev_attr_closebl.attr,
+	//Shengjun.Gou@PSW.MM.Display.LCD.Stability, 2017/02/15,
+	//add for read LCM window info
+	&dev_attr_lcm_id_info.attr,
+	/* Gou shengjun@PSW.MM.Driver.feature, 2018/07/27,
+	*add for dynamic fps switch
+	*/
+	&dev_attr_dynamic_fps_switch.attr,
+	#endif /*VENDOR_EDIT*/
+
 	&dev_attr_idle_power_collapse.attr,
 	NULL,
 };
@@ -1313,11 +1596,27 @@ static int mdss_fb_probe(struct platform_device *pdev)
 	}
 
 	mfd->ext_ad_ctrl = -1;
+	#ifndef VENDOR_EDIT
+	//Guoqiang.Jiang@PSW.MM.Display.LCD.Stability, 2018/10/31,
+	//modify for lcd happen esd set backlight 127 before set system backlight
 	if (mfd->panel_info && mfd->panel_info->brightness_max > 0)
 		MDSS_BRIGHT_TO_BL(mfd->bl_level, backlight_led.brightness,
 		mfd->panel_info->bl_max, mfd->panel_info->brightness_max);
 	else
 		mfd->bl_level = 0;
+	#else /*VENDOR_EDIT*/
+	if (mfd->panel_info && mfd->panel_info->brightness_max > 0){
+		MDSS_BRIGHT_TO_BL(mfd->bl_level, backlight_led.brightness,
+		mfd->panel_info->bl_max, mfd->panel_info->brightness_max);
+		if(mfd->panel_info->bl_max > 1023){
+			mfd->bl_level = 1600;   /*for 2048 level backlight set same to lk 1600*/
+		}else{
+			mfd->bl_level = 200;	/*for 200 level backlight set same to lk 200*/
+		}
+	}
+	else
+		mfd->bl_level = 0;
+	#endif /*VENDOR_EDIT*/
 
 	mfd->bl_scale = 1024;
 	mfd->ad_bl_level = 0;
@@ -1428,6 +1727,15 @@ static int mdss_fb_probe(struct platform_device *pdev)
 			pr_err("failed to register input handler\n");
 
 	INIT_DELAYED_WORK(&mfd->idle_notify_work, __mdss_fb_idle_notify_work);
+
+	#ifdef VENDOR_EDIT
+	//Shengjun.Gou@PSW.MM.Display.LCD.Stability, 2017/02/14,
+	//add for silence and sau mode close bl flag
+	if((MSM_BOOT_MODE__SILENCE == get_boot_mode()) || (MSM_BOOT_MODE__SAU == get_boot_mode())){
+		pr_debug("lcd_closebl_flag = 1\n");
+		lcd_closebl_flag = 1;
+	}
+	#endif /*VENDOR_EDIT*/
 
 	return rc;
 }
@@ -1748,6 +2056,9 @@ void mdss_fb_set_backlight(struct msm_fb_data_type *mfd, u32 bkl_lvl)
 	bool ad_bl_notify_needed = false;
 	bool bl_notify_needed = false;
 
+	#ifndef VENDOR_EDIT
+	//Shengjun.Gou@PSW.MM.Display.LCD.Stability, 2017/02/14,
+	//modify for Lcd ftm mode backlight
 	if ((((mdss_fb_is_power_off(mfd) && mfd->dcm_state != DCM_ENTER)
 		|| !mfd->allow_bl_update) && !IS_CALIB_MODE_BL(mfd)) ||
 		mfd->panel_info->cont_splash_enabled) {
@@ -1758,6 +2069,22 @@ void mdss_fb_set_backlight(struct msm_fb_data_type *mfd, u32 bkl_lvl)
 	} else {
 		mfd->unset_bl_level = U32_MAX;
 	}
+	#else /*VENDOR_EDIT*/
+	if(get_boot_mode() == MSM_BOOT_MODE__FACTORY){
+			mfd->unset_bl_level = 0;
+	}else{
+		if ((((mdss_fb_is_power_off(mfd) && mfd->dcm_state != DCM_ENTER)
+			|| !mfd->allow_bl_update) && !IS_CALIB_MODE_BL(mfd)) ||
+			mfd->panel_info->cont_splash_enabled) {
+			mfd->unset_bl_level = bkl_lvl;
+			return;
+		} else if (mdss_fb_is_power_on(mfd) && mfd->panel_info->panel_dead) {
+			mfd->unset_bl_level = mfd->bl_level;
+		} else {
+			mfd->unset_bl_level = U32_MAX;
+		}
+	}
+	#endif /*VENDOR_EDIT*/
 
 	pdata = dev_get_platdata(&mfd->pdev->dev);
 
@@ -1999,7 +2326,11 @@ static int mdss_fb_blank_unblank(struct msm_fb_data_type *mfd)
 	}
 
 	/* Reset the backlight only if the panel was off */
+	#ifndef VENDOR_EDIT
 	if (mdss_panel_is_power_off(cur_power_state)) {
+	#else
+	if (mdss_panel_is_power_off(cur_power_state) || mdss_panel_is_power_on_lp (cur_power_state) ) {
+	#endif
 		mutex_lock(&mfd->bl_lock);
 		if (!mfd->allow_bl_update) {
 			mfd->allow_bl_update = true;

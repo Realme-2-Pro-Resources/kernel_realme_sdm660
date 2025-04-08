@@ -4381,7 +4381,11 @@ void mmc_stop_host(struct mmc_host *host)
 		disable_irq(host->slot.cd_irq);
 
 	host->rescan_disable = 1;
+	#ifndef VENDOR_EDIT //yixue.ge@bsp.drv modify
 	cancel_delayed_work_sync(&host->detect);
+	#else
+	cancel_delayed_work(&host->detect);
+	#endif
 	mmc_flush_scheduled_work();
 
 	/* clear pm flags now and let card drivers set them as needed */

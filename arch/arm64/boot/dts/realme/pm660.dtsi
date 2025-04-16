@@ -162,10 +162,9 @@
     qcom,hold-soc-while-full;
 };
 
-&pm660_haptics{
+&pm660_haptics {
     /delete-property/ qcom,en-brake;
-    qcom,actuator-type = "erm";
-    qcom,vib-timemin-ms = <35>;
+    qcom,actuator-type = <1>;
 };
 
 &spmi_bus {

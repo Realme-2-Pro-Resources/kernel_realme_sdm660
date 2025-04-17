@@ -3052,7 +3052,7 @@ void oppo_set_otg_switch_status(bool value)
 				queue_work(oppodwc->dwc3_wq, &oppodwc->resume_work);
 		}
 	}
-	printk(KERN_ERR "[OPPO_CHG][%s] otg_is_in=%d, id_state=%d, otg_switch=%d, otg_online=%d, drd=%d\n",
+	pr_debug(KERN_ERR "[OPPO_CHG][%s] otg_is_in=%d, id_state=%d, otg_switch=%d, otg_online=%d, drd=%d\n",
 			__func__, oppodwc->otg_is_in, oppodwc->id_state, oppodwc->otg_switch, oppodwc->otg_online, dwc->is_drd);
 }
 EXPORT_SYMBOL(oppo_set_otg_switch_status);

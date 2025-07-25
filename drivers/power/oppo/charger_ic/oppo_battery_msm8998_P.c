@@ -6604,7 +6604,7 @@ static int smb2_batt_get_prop(struct power_supply *psy,
 			if (!g_oppo_chip->authenticate)
 				val->intval = POWER_SUPPLY_STATUS_NOT_CHARGING;
 			else
-				val->intval = g_oppo_chip->prop_status;
+				val->intval = g_oppo_chip->prop_status == POWER_SUPPLY_STATUS_NOT_CHARGING ? POWER_SUPPLY_STATUS_DISCHARGING : g_oppo_chip->prop_status;
 		} else {
 			rc = smblib_get_prop_batt_status(chg, val);
 		}

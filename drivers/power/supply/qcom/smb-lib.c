@@ -1877,47 +1877,6 @@ int smblib_get_prop_input_current_limited(struct smb_charger *chg,
 	return 0;
 }
 
-#ifdef VENDOR_EDIT
-int smblib_get_prop_batt_voltage_now(struct smb_charger *chg,
-				     union power_supply_propval *val)
-{
-	int rc;
-
-	if (!chg->bms_psy)
-		return -EINVAL;
-
-	rc = power_supply_get_property(chg->bms_psy,
-				       POWER_SUPPLY_PROP_VOLTAGE_NOW, val);
-	return rc;
-}
-
-int smblib_get_prop_batt_current_now(struct smb_charger *chg,
-				     union power_supply_propval *val)
-{
-	int rc;
-
-	if (!chg->bms_psy)
-		return -EINVAL;
-
-	rc = power_supply_get_property(chg->bms_psy,
-				       POWER_SUPPLY_PROP_CURRENT_NOW, val);
-	return rc;
-}
-
-int smblib_get_prop_batt_temp(struct smb_charger *chg,
-			      union power_supply_propval *val)
-{
-	int rc;
-
-	if (!chg->bms_psy)
-		return -EINVAL;
-
-	rc = power_supply_get_property(chg->bms_psy,
-				       POWER_SUPPLY_PROP_TEMP, val);
-	return rc;
-}
-#endif
-
 int smblib_get_prop_batt_charge_done(struct smb_charger *chg,
 					union power_supply_propval *val)
 {
@@ -4625,8 +4584,9 @@ irqreturn_t smblib_handle_wdog_bark(int irq, void *data)
 	if (rc < 0)
 		smblib_err(chg, "Couldn't pet the dog rc=%d\n", rc);
 
-	if (chg->step_chg_enabled || chg->sw_jeita_enabled)
+	if (chg->step_chg_enabled || chg->sw_jeita_enabled) {
 		power_supply_changed(chg->batt_psy);
+	}
 
 	return IRQ_HANDLED;
 }
@@ -4747,8 +4707,9 @@ static void bms_update_work(struct work_struct *work)
 
 	smblib_suspend_on_debug_battery(chg);
 
-	if (chg->batt_psy)
+	if (chg->batt_psy){
 		power_supply_changed(chg->batt_psy);
+	}
 }
 
 static void clear_hdc_work(struct work_struct *work)

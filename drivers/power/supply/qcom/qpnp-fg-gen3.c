@@ -4726,8 +4726,9 @@ static irqreturn_t fg_batt_missing_irq_handler(int irq, void *data)
 	clear_battery_profile(chip);
 	schedule_delayed_work(&chip->profile_load_work, 0);
 
-	if (chip->fg_psy)
+	if (chip->fg_psy) {
 		power_supply_changed(chip->fg_psy);
+	}
 
 	return IRQ_HANDLED;
 }
@@ -4848,8 +4849,9 @@ static irqreturn_t fg_delta_msoc_irq_handler(int irq, void *data)
 	if (rc < 0)
 		pr_err("Error in adjusting timebase, rc=%d\n", rc);
 
-	if (batt_psy_initialized(chip))
+	if (batt_psy_initialized(chip)){
 		power_supply_changed(chip->batt_psy);
+	}
 
 	return IRQ_HANDLED;
 }
@@ -4859,8 +4861,9 @@ static irqreturn_t fg_empty_soc_irq_handler(int irq, void *data)
 	struct fg_chip *chip = data;
 
 	fg_dbg(chip, FG_IRQ, "irq %d triggered\n", irq);
-	if (batt_psy_initialized(chip))
+	if (batt_psy_initialized(chip)) {
 		power_supply_changed(chip->batt_psy);
+	}
 
 	return IRQ_HANDLED;
 }

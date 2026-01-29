@@ -1,4 +1,5 @@
-/* Copyright (c) 2008-2016,2018-2019, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2016,2018-2019,2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -230,6 +231,11 @@ struct kgsl_memdesc {
 	struct page **pages;
 	unsigned int page_count;
 	unsigned int cur_bindings;
+	/*
+	 * @lock: Spinlock to protect the gpuaddr from being accessed by
+	 * multiple entities trying to map the same SVM region at once
+	 */
+	spinlock_t lock;
 };
 
 /*
@@ -278,6 +284,11 @@ struct kgsl_mem_entry {
 	struct work_struct work;
 	spinlock_t bind_lock;
 	struct rb_root bind_tree;
+	/*
+	 * @map_count: Count how many vmas this object is mapped in - used for
+	 * debugfs accounting
+	 */
+	atomic_t map_count;
 };
 
 struct kgsl_device_private;
@@ -457,6 +468,9 @@ extern const struct dev_pm_ops kgsl_pm_ops;
 
 int kgsl_suspend_driver(struct platform_device *pdev, pm_message_t state);
 int kgsl_resume_driver(struct platform_device *pdev);
+
+/* Helper functions */
+unsigned long kgsl_get_align(struct kgsl_memdesc *memdesc);
 
 static inline int kgsl_gpuaddr_in_memdesc(const struct kgsl_memdesc *memdesc,
 				uint64_t gpuaddr, uint64_t size)

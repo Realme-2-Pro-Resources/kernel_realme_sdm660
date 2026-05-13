@@ -1831,15 +1831,17 @@ void addrconf_dad_failure(struct inet6_ifaddr *ifp)
 	struct inet6_dev *idev = ifp->idev;
 	struct net *net = dev_net(ifp->idev->dev);
 
-	if (addrconf_dad_end(ifp)) {
+	spin_lock_bh(&ifp->lock);
+
+	if (ifp->state != INET6_IFADDR_STATE_DAD) {
+		spin_unlock_bh(&ifp->lock);
 		in6_ifa_put(ifp);
 		return;
 	}
+	ifp->state = INET6_IFADDR_STATE_POSTDAD;
 
 	net_info_ratelimited("%s: IPv6 duplicate address %pI6c detected!\n",
 			     ifp->idev->dev->name, &ifp->addr);
-
-	spin_lock_bh(&ifp->lock);
 
 	if (ifp->flags & IFA_F_STABLE_PRIVACY) {
 		int scope = ifp->scope;
@@ -1889,6 +1891,11 @@ void addrconf_dad_failure(struct inet6_ifaddr *ifp)
 		in6_ifa_put(ifp2);
 lock_errdad:
 		spin_lock_bh(&ifp->lock);
+		if (ifp->state != INET6_IFADDR_STATE_POSTDAD) {
+			spin_unlock_bh(&ifp->lock);
+			in6_ifa_put(ifp);
+			return;
+		}
 	} else if (idev->cnf.accept_dad > 1 && !idev->cnf.disable_ipv6) {
 		addr.s6_addr32[0] = htonl(0xfe800000);
 		addr.s6_addr32[1] = 0;

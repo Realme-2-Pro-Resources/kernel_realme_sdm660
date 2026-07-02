@@ -483,7 +483,7 @@ static bool batadv_is_orig_node_eligible(struct batadv_dat_candidate *res,
 	 * the one with the lowest address
 	 */
 	if ((tmp_max == max) && max_orig_node &&
-	    (batadv_compare_eth(candidate->orig, max_orig_node->orig) > 0))
+	    (memcmp(candidate->orig, max_orig_node->orig, ETH_ALEN) >= 0))
 		goto out;
 
 	ret = true;

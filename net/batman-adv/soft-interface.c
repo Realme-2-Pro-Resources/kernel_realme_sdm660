@@ -207,6 +207,9 @@ static int batadv_interface_tx(struct sk_buff *skb,
 	if (atomic_read(&bat_priv->mesh_state) != BATADV_MESH_ACTIVE)
 		goto dropped;
 
+	if (!pskb_may_pull(skb, ETH_HLEN))
+		goto dropped;
+
 	soft_iface->trans_start = jiffies;
 	vid = batadv_get_vid(skb, 0);
 

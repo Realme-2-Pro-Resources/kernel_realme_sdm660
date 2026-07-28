@@ -1761,9 +1761,10 @@ static int apply_temps(struct ceph_osdmap *osdmap,
 		temp_primary = *primary;
 	}
 
-	/* primary_temp? */
+	/* primary_temp? (shouldn't ever be a nonexistent or down OSD) */
 	pg = __lookup_pg_mapping(&osdmap->primary_temp, pgid);
-	if (pg)
+	if (pg && !WARN_ON_ONCE(ceph_osd_is_down(osdmap,
+						 pg->primary_temp.osd)))
 		temp_primary = pg->primary_temp.osd;
 
 	*primary = temp_primary;

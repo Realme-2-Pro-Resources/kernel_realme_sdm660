@@ -492,7 +492,7 @@ static int amdgpu_uvd_cs_msg_decode(uint32_t *msg, unsigned buf_sizes[])
 		return -EINVAL;
 	}
 
-	if (width > pitch) {
+	if (width > pitch || pitch > 4096) {
 		DRM_ERROR("Invalid UVD decoding target pitch!\n");
 		return -EINVAL;
 	}
@@ -504,7 +504,7 @@ static int amdgpu_uvd_cs_msg_decode(uint32_t *msg, unsigned buf_sizes[])
 	}
 
 	buf_sizes[0x1] = dpb_size;
-	buf_sizes[0x2] = image_size;
+	buf_sizes[0x2] = (pitch * height) * 3 / 2;
 	buf_sizes[0x4] = min_ctx_size;
 	return 0;
 }

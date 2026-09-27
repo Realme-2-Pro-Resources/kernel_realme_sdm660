@@ -16,6 +16,7 @@
 #include "mdss.dtsi"
 #include "mtp.dtsi"
 #include "pinctrl.dtsi"
+#include "ramoops.dtsi"
 
 /* diff with sdm660.dtsi */
 &removed_regions {

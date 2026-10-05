@@ -312,23 +312,23 @@ int tp_util_get_vendor(struct hw_resource *hw_res, struct panel_info *panel_data
        //panel_data->manufacture_info.fw_path = panel_data->fw_name;
 
        if(is_project(OPPO_18316)) {
-           if (strstr(boot_command_line, "tianma_nt36672")) {
+           if (strstr(saved_command_line, "tianma_nt36672")) {
                memcpy(panel_data->manufacture_info.version, "0xBD1671", 8);
-           }else if (strstr(boot_command_line, "dpt_jdi_nt36672")) {
+           }else if (strstr(saved_command_line, "dpt_jdi_nt36672")) {
                memcpy(panel_data->manufacture_info.version, "0xBD1672", 8);
-           }else if (strstr(boot_command_line, "himax_hx83112")) {
+           }else if (strstr(saved_command_line, "himax_hx83112")) {
                memcpy(panel_data->manufacture_info.version, "0xBD1673", 8);
            }
        }
        //memcpy(panel_data->manufacture_info.version, "0xBD1670", 8);
 
-       if (strstr(boot_command_line, "dpt_jdi_nt36672")) {    //noflash
+       if (strstr(saved_command_line, "dpt_jdi_nt36672")) {    //noflash
            panel_data->firmware_headfile.firmware_data = FW_18316_NT36672A_NF_DEPUTE;
            panel_data->firmware_headfile.firmware_size = sizeof(FW_18316_NT36672A_NF_DEPUTE);
-       }else if (strstr(boot_command_line, "tianma_nt36672")) {
+       }else if (strstr(saved_command_line, "tianma_nt36672")) {
            panel_data->firmware_headfile.firmware_data = FW_18316_NT36672A_NF_TIANMA;
            panel_data->firmware_headfile.firmware_size = sizeof(FW_18316_NT36672A_NF_TIANMA);
-       }else if (strstr(boot_command_line, "himax_hx83112")) {
+       }else if (strstr(saved_command_line, "himax_hx83112")) {
            panel_data->firmware_headfile.firmware_data = FW_18316_HX83112A_NF_DSJM;
            panel_data->firmware_headfile.firmware_size = sizeof(FW_18316_HX83112A_NF_DSJM);
        }else {
@@ -378,24 +378,24 @@ int tp_util_get_vendor(struct hw_resource *hw_res, struct panel_info *panel_data
        }
        //panel_data->manufacture_info.fw_path = panel_data->fw_name;
        if(is_project(OPPO_18321)) {
-           if (strstr(boot_command_line, "tianma_nt36672")) {
+           if (strstr(saved_command_line, "tianma_nt36672")) {
                memcpy(panel_data->manufacture_info.version, "0xBD1671", 8);
-           }else if (strstr(boot_command_line, "dpt_jdi_nt36672")) {
+           }else if (strstr(saved_command_line, "dpt_jdi_nt36672")) {
                memcpy(panel_data->manufacture_info.version, "0xBD1672", 8);
-           }else if (strstr(boot_command_line, "himax_hx83112")) {
+           }else if (strstr(saved_command_line, "himax_hx83112")) {
                memcpy(panel_data->manufacture_info.version, "0xBD1673", 8);
            }
        }
        //memcpy(panel_data->manufacture_info.version, "0xBD1670", 8);
 
 
-       if (strstr(boot_command_line, "dpt_jdi_nt36672")) {    //noflash
+       if (strstr(saved_command_line, "dpt_jdi_nt36672")) {    //noflash
            panel_data->firmware_headfile.firmware_data = FW_18316_NT36672A_NF_DEPUTE;
            panel_data->firmware_headfile.firmware_size = sizeof(FW_18316_NT36672A_NF_DEPUTE);
-       }else if (strstr(boot_command_line, "tianma_nt36672")) {
+       }else if (strstr(saved_command_line, "tianma_nt36672")) {
            panel_data->firmware_headfile.firmware_data = FW_18316_NT36672A_NF_TIANMA;
            panel_data->firmware_headfile.firmware_size = sizeof(FW_18316_NT36672A_NF_TIANMA);
-       }else if (strstr(boot_command_line, "himax_hx83112")) {
+       }else if (strstr(saved_command_line, "himax_hx83112")) {
            panel_data->firmware_headfile.firmware_data = FW_18316_HX83112A_NF_DSJM;
            panel_data->firmware_headfile.firmware_size = sizeof(FW_18316_HX83112A_NF_DSJM);
        }else {

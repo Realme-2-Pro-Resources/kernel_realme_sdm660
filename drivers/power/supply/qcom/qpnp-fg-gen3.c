@@ -5658,6 +5658,24 @@ static int fg_get_battery_soh(void)
         return -1;
 }
 
+static int fg_get_battery_fcc_uah(void)
+{
+        if (!fg_gen3_chip || fg_gen3_chip->cl.learned_cc_uah <= 0) {
+                return -1;
+        }
+
+        return (int)fg_gen3_chip->cl.learned_cc_uah;
+}
+
+static int fg_get_battery_design_capacity_uah(void)
+{
+        if (!fg_gen3_chip || fg_gen3_chip->cl.nom_cap_uah <= 0) {
+                return -1;
+        }
+
+        return (int)fg_gen3_chip->cl.nom_cap_uah;
+}
+
 static bool fg_get_battery_authenticate(void)
 {
 	if (!fg_gen3_chip) {
@@ -5689,6 +5707,8 @@ static struct oppo_gauge_operations fg_gauge = {
         .get_battery_soh                = fg_get_battery_soh,
         .get_battery_authenticate       = fg_get_battery_authenticate,
         .set_battery_full               = fg_set_battery_full,
+        .get_battery_fcc_uah            = fg_get_battery_fcc_uah,
+        .get_battery_design_capacity_uah = fg_get_battery_design_capacity_uah,
 };
 #endif
 

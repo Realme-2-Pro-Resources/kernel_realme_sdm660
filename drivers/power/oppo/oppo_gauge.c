@@ -98,6 +98,25 @@ int oppo_gauge_get_batt_soh(void)
         }
 }
 
+int oppo_gauge_get_batt_fcc_uah(void)
+{
+        if (!g_gauge_chip || !g_gauge_chip->gauge_ops->get_battery_fcc_uah) {
+                return -1;
+        } else {
+                return g_gauge_chip->gauge_ops->get_battery_fcc_uah();
+        }
+}
+
+int oppo_gauge_get_batt_design_capacity_uah(void)
+{
+        if (!g_gauge_chip ||
+                !g_gauge_chip->gauge_ops->get_battery_design_capacity_uah) {
+                return -1;
+        } else {
+                return g_gauge_chip->gauge_ops->get_battery_design_capacity_uah();
+        }
+}
+
 bool oppo_gauge_get_batt_authenticate(void)
 {
         if (!g_gauge_chip) {

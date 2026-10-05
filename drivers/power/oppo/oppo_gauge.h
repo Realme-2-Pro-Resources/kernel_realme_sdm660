@@ -48,6 +48,8 @@ struct oppo_gauge_operations {
         int (*get_prev_battery_mvolts)(void);
         int (*get_prev_battery_temperature)(void);
         int (*get_prev_average_current)(void);
+        int (*get_battery_fcc_uah)(void);
+        int (*get_battery_design_capacity_uah)(void);
 };
 
 /****************************************
@@ -67,6 +69,8 @@ int oppo_gauge_get_remaining_capacity(void);
 int oppo_gauge_get_device_type(void);
 
 int oppo_gauge_get_batt_fcc(void);
+int oppo_gauge_get_batt_fcc_uah(void);
+int oppo_gauge_get_batt_design_capacity_uah(void);
 
 int oppo_gauge_get_batt_cc(void);
 int oppo_gauge_get_batt_soh(void);

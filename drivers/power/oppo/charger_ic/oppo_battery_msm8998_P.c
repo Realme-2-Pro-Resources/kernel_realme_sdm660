@@ -6578,6 +6578,7 @@ static enum power_supply_property smb2_batt_props[] = {
 #ifdef VENDOR_EDIT
 /* Ji.Xu@BSP.CHG.Basic, 2018/12/5, xj Add charge_full node for CTS test*/
 	POWER_SUPPLY_PROP_CHARGE_FULL,
+	POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN,
 #endif
 	POWER_SUPPLY_PROP_CHARGE_COUNTER,
 	/*add current for cts test by wenbin.liu*/
@@ -6830,9 +6831,19 @@ static int smb2_batt_get_prop(struct power_supply *psy,
 #ifdef VENDOR_EDIT
 /* Ji.Xu@BSP.CHG.Basic, 2018/12/5, xj Add charge_full node for CTS test*/
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
-		if (g_oppo_chip)
-			val->intval = g_oppo_chip->batt_capacity_mah*1000;
-		else
+		val->intval = oppo_gauge_get_batt_fcc_uah();
+		if (val->intval <= 0)
+			val->intval = oppo_gauge_get_batt_design_capacity_uah();
+		if (val->intval <= 0 && g_oppo_chip)
+			val->intval = g_oppo_chip->batt_capacity_mah * 1000;
+		if (val->intval <= 0)
+			val->intval = -1;
+		break;
+	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
+		val->intval = oppo_gauge_get_batt_design_capacity_uah();
+		if (val->intval <= 0 && g_oppo_chip)
+			val->intval = g_oppo_chip->batt_capacity_mah * 1000;
+		if (val->intval <= 0)
 			val->intval = -1;
 		break;
 #endif

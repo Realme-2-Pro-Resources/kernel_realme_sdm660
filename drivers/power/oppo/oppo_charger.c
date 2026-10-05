@@ -3211,6 +3211,8 @@ static void oppo_chg_check_aicl_input_limit(struct oppo_chg_chip *chip)
 
         if (aicl_delay_count > AICL_DELAY_15MIN) {
                 aicl_delay_count = 0;
+                if (chip->pmic_spmi.smb2_chip)
+                        chip->pmic_spmi.smb2_chip->chg.pre_current_ma = -1;
                 oppo_chg_set_input_current_limit(chip);
         } else if (chip->pmic_spmi.aicl_suspend == true && chip->charger_volt > 4450 && chip->charger_volt < 5800) {
                 aicl_delay_count = 0;

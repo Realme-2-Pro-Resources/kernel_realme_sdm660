@@ -8683,7 +8683,7 @@ static int oppo_chg_set_input_current(struct oppo_chg_chip *chip, int current_ma
 		goto aicl_boost_back;
 	}
 	if (chg_vol < aicl_point_temp) {
-		i = i - 2; //We DO NOT use 1.2A here
+		i = i - 1; //Fall back to 1.2A (already verified at previous step)
 		goto aicl_pre_step;
 	} else if (current_ma < 1500) {
 		i = i - 1; //We use 1.2A here
@@ -8766,6 +8766,8 @@ static int oppo_chg_set_input_current(struct oppo_chg_chip *chip, int current_ma
 		goto aicl_end;
 
 aicl_pre_step:
+	/* Clear sticky cache so the next request re-runs the AICL ladder */
+	chip->pmic_spmi.smb2_chip->chg.pre_current_ma = -1;
 	rc = vote(chip->pmic_spmi.smb2_chip->chg.usb_icl_votable, USB_PSY_VOTER, true, usb_icl[i] * 1000);
 	chg_debug( "usb input max current limit aicl chg_vol=%d j[%d]=%d sw_aicl_point:%d aicl_pre_step\n", chg_vol, i, usb_icl[i], aicl_point_temp);
 	smbchg_rerun_aicl(chip);

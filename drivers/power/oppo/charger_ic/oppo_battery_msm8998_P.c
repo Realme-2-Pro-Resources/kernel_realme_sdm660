@@ -9266,9 +9266,7 @@ static int opchg_get_charger_type(void)
 		chg_debug("Type Recovey Call, Type = %d\n", chg->real_charger_type);
 	}
 
-	if (chg->real_charger_type == POWER_SUPPLY_TYPE_USB_CDP)
-		return POWER_SUPPLY_TYPE_USB;
-	
+	/* Report CDP as-is so the IC's 1500mA CDP vote is not capped to SDP */
 	return chg->real_charger_type;
 }
 

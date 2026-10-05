@@ -1241,6 +1241,7 @@ void __ceph_flush_snaps(struct ceph_inode_info *ci,
 		__acquires(ci->i_ceph_lock)
 {
 	struct inode *inode = &ci->vfs_inode;
+	bool need_put = false;
 	int mds;
 	struct ceph_cap_snap *capsnap;
 	u32 mseq;
@@ -1344,9 +1345,13 @@ retry:
 
 	/* we flushed them all; remove this inode from the queue */
 	spin_lock(&mdsc->snap_flush_lock);
+	if (!list_empty(&ci->i_snap_flush_item))
+		need_put = true;
 	list_del_init(&ci->i_snap_flush_item);
 	spin_unlock(&mdsc->snap_flush_lock);
 
+	if (need_put)
+		iput(inode);
 out:
 	if (psession)
 		*psession = session;
@@ -3463,6 +3468,7 @@ void ceph_handle_caps(struct ceph_mds_session *session,
 
 	snaptrace = h + 1;
 	snaptrace_len = le32_to_cpu(h->snap_trace_len);
+	ceph_decode_need(&snaptrace, end, snaptrace_len, bad);
 	p = snaptrace + snaptrace_len;
 
 	if (le16_to_cpu(msg->hdr.version) >= 2) {

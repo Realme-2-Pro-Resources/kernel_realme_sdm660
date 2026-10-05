@@ -74,7 +74,6 @@ config PAGE_POISONING_ENABLE_DEFAULT
 	  can be overridden by page_poison=off|on. This can be used
 	  to avoid passing the kernel parameter and let page poisoning
 	  feature enabled by default.
-
 config PAGE_POISONING_NO_SANITY
 	depends on PAGE_POISONING
 	bool "Only poison, don't sanity check"

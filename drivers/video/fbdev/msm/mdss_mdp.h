@@ -15,6 +15,7 @@
 #ifndef MDSS_MDP_H
 #define MDSS_MDP_H
 
+#include <linux/bitops.h>
 #include <linux/io.h>
 #include <linux/msm_mdp.h>
 #include <linux/msm_mdp_ext.h>
@@ -139,8 +140,6 @@
 /* hw cursor can only be setup in highest mixer stage */
 #define HW_CURSOR_STAGE(mdata) \
 	(((mdata)->max_target_zorder + MDSS_MDP_STAGE_0) - 1)
-
-#define BITS_TO_BYTES(x) DIV_ROUND_UP(x, BITS_PER_BYTE)
 
 #define PP_PROGRAM_PA		0x1
 #define PP_PROGRAM_PCC		0x2

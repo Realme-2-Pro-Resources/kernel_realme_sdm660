@@ -5554,9 +5554,7 @@ static void fg_cleanup(struct fg_chip *chip)
 #define DEFAULT_BATT_TEMP            250
 #define DEFAULT_BATT_VOLT            3800
 #define DEFAULT_BATT_SOC             50
-#define WAIT_FOR_HEALTHD_SOC         -1
 #define DEFAULT_BATT_CURRENT         500
-#define MAX_WAIT_FOR_HEALTHD_COUNT   12
 #define BATT_CAPACITY                4100
 
 static int fg_get_battery_mvolts(void)
@@ -5601,7 +5599,6 @@ static int fg_get_batt_remaining_capacity(void)
 static int fg_get_battery_soc(void)
 {
 	int rc = 0, batt_soc = 0;
-	static int count = 0;
 
 	if (!fg_gen3_chip) {
 	        return DEFAULT_BATT_SOC;
@@ -5611,16 +5608,6 @@ static int fg_get_battery_soc(void)
 	if (rc < 0) {
 	        pr_err("failed to get battery soc, return 50!\n");
 	        return DEFAULT_BATT_SOC;
-	}
-
-	if (get_boot_mode() == MSM_BOOT_MODE__RECOVERY) {
-	        return batt_soc;
-	}
-
-	if (healthd_ready == false && count < MAX_WAIT_FOR_HEALTHD_COUNT) {
-	        pr_debug("healthd not ready, count = %d\n", count);
-	        count ++;
-	        return WAIT_FOR_HEALTHD_SOC;
 	}
 
 	return batt_soc;

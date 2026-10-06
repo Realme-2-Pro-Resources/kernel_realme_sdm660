@@ -12,10 +12,18 @@
 
 / {
 	reserved-memory {
-		ramoops_mem: ramoops_region@b0000000 {
+		/*
+		 * 0xb0000000 is claimed as a device resource by the icnss
+		 * (WiFi) node in sdm660.dtsi as its "smmu_iova_ipa" window, so
+		 * request_mem_region() for a ramoops region there fails with
+		 * -EBUSY and the whole pstore backend never registers.
+		 * Place ramoops in the free window between cdsp_fw_mem (ends
+		 * 0x95200000) and cont_splash_mem (starts 0x9d400000) instead.
+		 */
+		ramoops_mem: ramoops_region@9c400000 {
 			compatible = "removed-dma-pool";
 			no-map;
-			reg = <0 0xb0000000 0 0x400000>;
+			reg = <0 0x9c400000 0 0x1000000>;
 		};
 	};
 };
@@ -24,6 +32,7 @@
 	ramoops {
 		compatible = "ramoops";
 		memory-region = <&ramoops_mem>;
+		record-size = <0x0 0x200000>;
 		console-size = <0x0 0x200000>;
 		pmsg-size = <0x0 0x200000>;
 	};

@@ -1446,16 +1446,26 @@ out_copy_to_user:
 
 void susfs_spoof_cmdline_or_bootconfig(struct seq_file *m) {
 	unsigned seq;
-	char *buf = (char *)kmalloc(SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE, GFP_KERNEL);
+	char *buf;
 
+	if (!fake_cmdline_or_bootconfig)
+		return;
+
+	buf = (char *)kmalloc(SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE, GFP_KERNEL);
 	if (!buf) {
 		return;
 	}
 	do {
 		seq = read_seqbegin(&susfs_fake_cmdline_or_bootconfig_seqlock);
+		if (!fake_cmdline_or_bootconfig) {
+			kfree(buf);
+			return;
+		}
 		strscpy(buf, fake_cmdline_or_bootconfig, SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE);
 	} while (read_seqretry(&susfs_fake_cmdline_or_bootconfig_seqlock, seq));
 	seq_puts(m, buf);
+	if (buf[0] && buf[strlen(buf) - 1] != '\n')
+		seq_putc(m, '\n');
 	kfree(buf);
 }
 #endif

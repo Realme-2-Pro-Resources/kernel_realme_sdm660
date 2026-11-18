@@ -1538,14 +1538,7 @@ static int ak4376_set_bias_level(struct snd_soc_codec *codec,
 			akdbgprt("\t[AK4376] %s(%d) codec->dapm.bias_level == SND_SOC_BIAS_OFF\n",__FUNCTION__,__LINE__);
 		break;
 	case SND_SOC_BIAS_OFF:
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
-		if (codec->dapm.bias_level == SND_SOC_BIAS_STANDBY) {
-#else
-		if (snd_soc_codec_get_bias_level(codec) == SND_SOC_BIAS_STANDBY) {
-#endif
-			akdbgprt("\t[AK4376] %s(%d) codec->dapm.bias_level == SND_SOC_BIAS_STANDBY\n",__FUNCTION__,__LINE__);
-			ak4376_pdn_control(codec, 0);
-		}
+		ak4376_pdn_control(codec, 0);
 		break;
 	}
 
@@ -1649,7 +1642,7 @@ static int ak4376_init_reg(struct snd_soc_codec *codec)
         printk("This device are neither AK4375/A nor AK4376.\n");
     }
 
-    ak4376_set_bias_level(codec, SND_SOC_BIAS_STANDBY);
+    ak4376_set_bias_level(codec, SND_SOC_BIAS_OFF);
 
     akdbgprt("\t[AK4376 bias] %s(%d)\n",__FUNCTION__,__LINE__);
 

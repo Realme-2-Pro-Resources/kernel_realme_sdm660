@@ -18,6 +18,11 @@
 // Declaration
 //////////////////////////////////////////////////////
 
+#ifdef CONFIG_KSU_SUSFS
+extern int susfs_add_sus_avd_allowed_by_type(u32 s_type, u32 t_type, u16 type, u32 orig_avd_allowed);
+extern int susfs_add_sus_type(const char *secctx, u32 type_value);
+#endif
+
 static struct avtab_node *get_avtab_node(struct policydb *db, struct avtab_key *key,
                                          struct avtab_extended_perms *xperms);
 
@@ -338,6 +343,10 @@ static bool add_rule_raw(struct policydb *db, struct type_datum *src, struct typ
 			if (!node)
 				return false;
 		}
+
+#ifdef CONFIG_KSU_SUSFS
+		susfs_add_sus_avd_allowed_by_type(src->value, tgt->value, cls->value, node->datum.u.data);
+#endif
 
 		if (invert) {
 			if (perm)
@@ -804,6 +813,9 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 				1);
 	}
 
+#ifdef CONFIG_KSU_SUSFS
+	susfs_add_sus_type(type_name, type->value);
+#endif
 	return true;
 
 #elif defined(KSU_TYPE_VAL_TO_STRUCT_ARRAY)
@@ -852,6 +864,9 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 				1);
 	}
 
+#ifdef CONFIG_KSU_SUSFS
+	susfs_add_sus_type(type_name, type->value);
+#endif
 	return true;
 
 #elif defined(CONFIG_IS_HW_HISI)
@@ -903,6 +918,9 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 				1);
 	}
 
+#ifdef CONFIG_KSU_SUSFS
+	susfs_add_sus_type(type_name, type->value);
+#endif
 	return true;
 #else
 	// flex_array is not extensible, we need to create a new bigger one instead
@@ -1013,6 +1031,9 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 		ebitmap_set_bit(&db->role_val_to_struct[i]->types, value - 1,
 				1);
 	}
+#ifdef CONFIG_KSU_SUSFS
+	susfs_add_sus_type(type_name, type->value);
+#endif
 	return true;
 #endif
 

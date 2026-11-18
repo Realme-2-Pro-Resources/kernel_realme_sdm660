@@ -94,6 +94,9 @@ static int do_report_event(void __user *arg)
 			boot_complete_lock = true;
 			pr_info("boot_complete triggered\n");
 			on_boot_completed();
+#ifdef CONFIG_KSU_SUSFS
+			susfs_start_sdcard_monitor_fn();
+#endif
 		}
 		break;
 	}
@@ -444,6 +447,15 @@ static int do_manage_mark(void __user *arg)
 
 	switch (cmd.operation) {
 		case KSU_MARK_GET: {
+#ifdef CONFIG_KSU_SUSFS
+			if (susfs_is_current_proc_no_su()) {
+				ret = 0;
+			} else {
+				ret = 1;
+			}
+			cmd.result = (u32)ret;
+			break;
+#else
 			// on this one, we return seccomp status of a pid instead
 			// at the very least we have partial featureset
 			ret = ksu_get_task_mark(cmd.pid);
@@ -453,6 +465,7 @@ static int do_manage_mark(void __user *arg)
 			}
 			cmd.result = (u32)ret;
 			break;
+#endif
 		}
 #if 0 // TODO: revisit this sometime
 		case KSU_MARK_MARK: { break; }

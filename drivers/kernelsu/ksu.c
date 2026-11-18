@@ -41,6 +41,9 @@
 #include "include/arch.h"
 #include "include/klog.h"
 #include "include/ksu.h"
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs.h>
+#endif
 
 // kernel compat
 #include "kernel_compat.h"
@@ -288,6 +291,11 @@ static int __init kernelsu_init(void)
 #endif
 
 	ksu_lsm_hook_init();
+
+#ifdef CONFIG_KSU_SUSFS
+	susfs_init();
+#endif
+
 	return 0;
 }
 

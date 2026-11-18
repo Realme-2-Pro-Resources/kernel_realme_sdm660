@@ -14,9 +14,18 @@
 #include <linux/security.h>
 #include <linux/syscalls.h>
 #include <linux/pagemap.h>
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs_def.h>
+#endif // #ifdef CONFIG_KSU_SUSFS
 
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
+
+
+#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+extern bool susfs_is_inode_sus_kstat(struct inode *inode, bool *out_is_fuse);
+extern void susfs_sus_kstat_spoof_generic_fillattr(struct inode *inode, struct kstat *stat, u32 result_mask);
+#endif // #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
 
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
@@ -52,12 +61,40 @@ EXPORT_SYMBOL(generic_fillattr);
 int vfs_getattr_nosec(struct path *path, struct kstat *stat)
 {
 	struct inode *inode = d_backing_inode(path->dentry);
+#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+	u32 result_mask = 0;
+	if (susfs_is_current_app_uid()) {
+		bool is_fuse = false;
+		if (susfs_is_inode_sus_kstat(inode, &is_fuse)) {
+			if (!is_fuse) {
+				result_mask = STATX_SUS_KSTAT;
+			} else {
+				result_mask = STATX_SUS_KSTAT_FUSE;
+			}
+		}
+	}
+#endif // #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
 
 	if (inode->i_op->getattr)
+#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+	{
+		int err = inode->i_op->getattr(path->mnt, path->dentry, stat);
+		if (!err && result_mask) {
+			susfs_sus_kstat_spoof_generic_fillattr(inode, stat, result_mask);
+		}
+		return err;
+	}
+	generic_fillattr(inode, stat);
+	if (result_mask) {
+		susfs_sus_kstat_spoof_generic_fillattr(inode, stat, result_mask);
+	}
+	return 0;
+#else
 		return inode->i_op->getattr(path->mnt, path->dentry, stat);
 
 	generic_fillattr(inode, stat);
 	return 0;
+#endif
 }
 
 EXPORT_SYMBOL(vfs_getattr_nosec);

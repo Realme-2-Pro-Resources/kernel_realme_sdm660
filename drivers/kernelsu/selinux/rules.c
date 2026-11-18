@@ -234,6 +234,9 @@ out_flush:
 	smp_mb();
 	reset_avc_cache(get_latest_granting_inc());
 #endif
+#ifdef CONFIG_KSU_SUSFS
+	susfs_set_batch_sid();
+#endif
 }
 
 #define KSU_SEPOLICY_MAX_BATCH_SIZE (8U * 1024U * 1024U)

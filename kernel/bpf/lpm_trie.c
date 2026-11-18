@@ -697,7 +697,11 @@ find_leftmost:
 	 */
 	for (node = search_root; node;) {
 		if (node->flags & LPM_TREE_NODE_FLAG_IM) {
-			node = rcu_dereference(node->child[0]);
+			struct lpm_trie_node *child = rcu_dereference(node->child[0]);
+
+			if (!child)
+				child = rcu_dereference(node->child[1]);
+			node = child;
 		} else {
 			next_node = node;
 			node = rcu_dereference(node->child[0]);
@@ -706,6 +710,10 @@ find_leftmost:
 		}
 	}
 do_copy:
+	if (!next_node) {
+		err = -ENOENT;
+		goto free_stack;
+	}
 	next_key->prefixlen = next_node->prefixlen;
 	memcpy((void *)next_key + offsetof(struct bpf_lpm_trie_key, data),
 	       next_node->data, trie->data_size);
